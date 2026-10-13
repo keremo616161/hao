@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ZT3 Pro CFW Builder</title>
+  <title>ZT3 Pro Firmware Analyzer</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
-      max-width: 680px;
+      max-width: 720px;
       margin: 24px auto;
       padding: 16px;
       background: #101318;
@@ -20,128 +20,130 @@
       border: 1px solid #414854;
       border-radius: 14px;
     }
-    input, button {
-      margin-top: 12px;
-      max-width: 100%;
-    }
+    input, button { margin-top: 12px; max-width: 100%; }
     button {
       padding: 12px 16px;
       border: 0;
       border-radius: 8px;
-      background: #dce7ff;
-      color: #101318;
-      font-weight: 600;
     }
     .status {
       color: #c3ccda;
-      overflow-wrap: anywhere;
       font-size: 14px;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
     }
-    code { overflow-wrap: anywhere; }
+    .warning { color: #ffd18a; }
   </style>
 </head>
 <body>
-  <h1>ZT3 Pro CFW Builder</h1>
-  <p>Prototyp · VCU und MCU</p>
+  <h1>ZT3 Pro Firmware Analyzer</h1>
+  <p>Lokale Dateianalyse · VCU und MCU</p>
 
   <section>
-    <h2>VCU-Firmware</h2>
+    <h2>VCU-Datei</h2>
     <input id="vcu" type="file">
     <p id="vcuStatus" class="status">Keine Datei ausgewählt.</p>
   </section>
 
   <section>
-    <h2>MCU-Firmware</h2>
+    <h2>MCU-Datei</h2>
     <input id="mcu" type="file">
     <p id="mcuStatus" class="status">Keine Datei ausgewählt.</p>
   </section>
 
   <section>
-    <h2>Datei-Prüfung</h2>
+    <h2>Analyse</h2>
     <p class="status">
-      Berechnet SHA-256 lokal im Browser.
-      Es werden keine Dateien hochgeladen.
+      Dateien werden lokal analysiert. Es wird nichts hochgeladen.
+      Die Analyse bestätigt keine Firmware-Kompatibilität.
     </p>
-    <button id="check">Dateien prüfen</button>
+    <button id="analyze">Beide Dateien analysieren</button>
     <p id="result" class="status" aria-live="polite">
       Warte auf Dateien.
     </p>
   </section>
 
-  <script>
-    const MAX_SIZE = 32 * 1024 * 1024;
+<script>
+  const MAX_SIZE = 32 * 1024 * 1024;
 
-    async function inspectFile(inputId, statusId) {
-      const file = document.getElementById(inputId).files[0];
-      const status = document.getElementById(statusId);
+  async function analyzeFile(inputId, statusId) {
+    const file = document.getElementById(inputId).files[0];
+    const status = document.getElementById(statusId);
 
-      if (!file) {
-        status.textContent = "Keine Datei ausgewählt.";
-        return null;
-      }
-
-      status.textContent =
-        `${file.name} · ${file.size} Bytes`;
-
-      if (file.size === 0) {
-        throw new Error(`${file.name}: Datei ist leer.`);
-      }
-
-      if (file.size > MAX_SIZE) {
-        throw new Error(
-          `${file.name}: Über 32 MiB. Bitte kleinere Datei wählen.`
-        );
-      }
-
-      if (!window.crypto?.subtle) {
-        throw new Error(
-          "SHA-256 nicht verfügbar. Öffne die Webseite über HTTPS."
-        );
-      }
-
-      const bytes = await file.arrayBuffer();
-      const digest = await crypto.subtle.digest("SHA-256", bytes);
-
-      const hash = Array.from(new Uint8Array(digest))
-        .map(byte => byte.toString(16).padStart(2, "0"))
-        .join("");
-
-      status.textContent =
-        `${file.name} · ${file.size} Bytes\nSHA-256: ${hash}`;
-
-      return { name: file.name, size: file.size, hash };
+    if (!file) {
+      status.textContent = "Keine Datei ausgewählt.";
+      return null;
     }
 
-    document.getElementById("check").addEventListener(
-      "click",
-      async () => {
-        const button = document.getElementById("check");
-        const result = document.getElementById("result");
+    if (file.size === 0) {
+      throw new Error(file.name + ": Datei ist leer.");
+    }
 
-        button.disabled = true;
-        result.textContent = "Prüfung läuft …";
+    if (file.size > MAX_SIZE) {
+      throw new Error(file.name + ": Maximal 32 MiB erlaubt.");
+    }
 
-        try {
-          const vcu = await inspectFile("vcu", "vcuStatus");
-          const mcu = await inspectFile("mcu", "mcuStatus");
+    if (!crypto.subtle) {
+      throw new Error("SHA-256 benötigt eine sichere HTTPS-Seite.");
+    }
 
-          if (!vcu || !mcu) {
-            result.textContent =
-              "Bitte wähle eine VCU- und eine MCU-Datei aus.";
-            return;
-          }
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    const digest = await crypto.subtle.digest("SHA-256", buffer);
 
-          result.textContent =
-            "Prüfung abgeschlossen. Beide Dateien wurden gehasht. " +
-            "Firmware-Format und Hardware-Kompatibilität sind " +
-            "noch nicht verifiziert.";
-        } catch (error) {
-          result.textContent = `Prüfung fehlgeschlagen: ${error.message}`;
-        } finally {
-          button.disabled = false;
-        }
+    const hash = Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    const header = Array.from(bytes.slice(0, 16))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join(" ");
+
+    const dot = file.name.lastIndexOf(".");
+    const extension = dot >= 0
+      ? file.name.slice(dot).toLowerCase()
+      : "(keine)";
+
+    const report = [
+      "Datei: " + file.name,
+      "Größe: " + file.size + " Bytes",
+      "Endung: " + extension,
+      "Erste Bytes: " + (header || "(leer)"),
+      "SHA-256: " + hash,
+      "Format: Noch nicht identifiziert",
+      "Kompatibilität: Nicht geprüft"
+    ].join("\n");
+
+    status.textContent = report;
+
+    return { name: file.name, size: file.size, hash };
+  }
+
+  document.getElementById("analyze").addEventListener("click", async () => {
+    const button = document.getElementById("analyze");
+    const result = document.getElementById("result");
+
+    button.disabled = true;
+    result.textContent = "Analysiere Dateien …";
+
+    try {
+      const vcu = await analyzeFile("vcu", "vcuStatus");
+      const mcu = await analyzeFile("mcu", "mcuStatus");
+
+      if (!vcu || !mcu) {
+        result.textContent = "Bitte wähle beide Dateien aus.";
+        return;
       }
-    );
-  </script>
+
+      result.textContent =
+        "Analyse abgeschlossen. Die Dateiberichte stehen oben. " +
+        "Ein gültiger Build oder eine Kompatibilität wurde nicht bestätigt.";
+    } catch (error) {
+      result.textContent = "Fehler: " + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
 </body>
 </html>
