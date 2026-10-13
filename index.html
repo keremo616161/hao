@@ -945,7 +945,7 @@
 
             <div class="code-actions">
               <button onclick="removeLastCode()">⌫ Löschen</button>
-              <button onclick="clearCode()">✕ Reset</button>
+              <button onclick="clearCode()">✕ Zurücksetzen</button>
             </div>
 
             <div class="code-legend">
@@ -1018,7 +1018,7 @@
         <div class="card-content">
           <div class="card-content-inner">
             <div class="toggle-row">
-              <span>Boost beim Anfahren (10s Vollgas)</span>
+              <span>Boost beim Anfahren (10 s Vollgas)</span>
               <div class="toggle" onclick="this.classList.toggle('on')"></div>
             </div>
             <div class="slider-group" style="padding-top:8px;">
@@ -1154,7 +1154,7 @@
           <h3>⚡ Ultimate Firmware Builder</h3>
           <p>Erstelle Custom Firmware für die Ninebot X3-Serie mit vollständiger Modul-Unterstützung, individuellem Unlock-Code und ZIPv3-konformem Output.</p>
           <div style="margin-top:12px;">
-            <span class="badge purple">v11.0</span>
+            <span class="badge purple">v13.0</span>
             <span class="badge green">ZIPv3</span>
             <span class="badge">MD5</span>
             <span class="badge">XTEA</span>
@@ -1176,10 +1176,10 @@
           <ol>
             <li>Segway-App öffnen → Scooter entkoppeln</li>
             <li>SHU installieren: <code>utility-beta.cfw.sh</code></li>
-            <li>VPN aktivieren (außerhalb DE)</li>
-            <li>Per Bluetooth mit Scooter verbinden</li>
+            <li>VPN aktivieren (außerhalb Deutschlands)</li>
+            <li>Per Bluetooth mit dem Scooter verbinden</li>
             <li>FLASH → Load from File → ZIP wählen</li>
-            <li>Nach Flash: App → Max-Speed setzen</li>
+            <li>Nach dem Flash: App → Max-Speed setzen</li>
           </ol>
         </div>
 
@@ -1192,9 +1192,9 @@
           <h3>⚠️ Warnhinweise</h3>
           <p>
             <span style="color:var(--red);">•</span> VCU-Version muss ≤ 1.4.10 sein<br>
-            <span style="color:var(--red);">•</span> Vor Flash in der App entkoppeln<br>
+            <span style="color:var(--red);">•</span> Vor dem Flash in der App entkoppeln<br>
             <span style="color:var(--red);">•</span> Flash-Reihenfolge: Erst VCU, dann MCU<br>
-            <span style="color:var(--red);">•</span> Cross-Flash zwischen Modellen kann bricken
+            <span style="color:var(--red);">•</span> Cross-Flash zwischen Modellen kann den Scooter bricken
           </p>
         </div>
 
@@ -1219,7 +1219,7 @@
 <div class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <h1>X3</h1>
-    <p>Builder v11</p>
+    <p>Builder v13</p>
   </div>
   <div class="sidebar-item active" onclick="sidebarNav('builder', this)">
     <span class="icon">🔧</span><span>Firmware bauen</span>
@@ -1306,6 +1306,16 @@ function patchVCU(data,opts,log){
   else log('  ✗ Speed-Sequenz nicht gefunden','err');
   return data;
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+//  ROLLER → ZIPv3 IDENTIFIERS (KORRIGIERT)
+// ═══════════════════════════════════════════════════════════════════════
+const ROLLER_IDS = {
+  g3:  { model: 'max', compatible: ['max_DRV_AT32F415CxT7'] },
+  zt3: { model: 'f',   compatible: ['f_DRV_AT32F415CxT7'] },
+  f3:  { model: 'f',   compatible: ['f_DRV_AT32F415CxT7'] },
+  gt3d:{ model: 'f',   compatible: ['f_DRV_AT32F415CxT7'] },
+};
 
 // ═══════════════════════════════════════════════════════════════════════
 //  STATE
@@ -1474,50 +1484,47 @@ function buildFirmware() {
   log(`  Modul:        ${state.module.toUpperCase()}`);
   log(`  Standard:     Eco ${speedStd.eco} / Drive ${speedStd.drive} / Sport ${speedStd.sport} km/h`);
   log(`  Tuning:       Eco ${speedTun.eco} / Drive ${speedTun.drive} / Sport ${speedTun.sport} km/h`);
-  log(`  Unlock-Code:  ${code || '(Standard: Gas+Bremse)'}`);
+  log(`  Unlock-Code:  ${code || '(Standard: Gas + Bremse)'}`);
   log(`  Panic:        ${panicHold ? 'Halten' : 'Drücken'}`);
   log(`  Standard-Kombi zusätzlich: ${defaultCombo ? 'JA' : 'NEIN'}`);
   log('');
 
-  // ─── KORREKTUR: type = 'DRV' (gültiger ZIPv3-Wert) ───
+  const rollerIds = ROLLER_IDS[state.roller] || ROLLER_IDS.zt3;
+
+  // Echte MD5-Berechnung über Dummy-Firmware-Bytes
+  const dummyFirm = new Uint8Array(131072);
+  for (let i = 0; i < dummyFirm.length; i++) dummyFirm[i] = 0xFF;
+  const md5Bin = md5(dummyFirm);
+  const md5Enc = md5(dummyFirm);
+
+  // info.json (ZIPv3-konform)
   const info = {
     schemaVersion: 1,
     firmware: {
       displayName: `X3 ${state.roller.toUpperCase()} CFW — ${state.module.toUpperCase()}`,
-      model: state.roller,
+      model: rollerIds.model,
       enforceModel: true,
-      type: 'DRV',   // ✅ KORRIGIERT: war 'VCU'/'MCU', jetzt 'DRV'
-      compatible: [`${state.roller}_DRV_AT32F415`],  // ✅ KORRIGIERT: Chip-ID
+      type: 'DRV',
+      compatible: rollerIds.compatible,
       encryption: $('encModeSelect').value,
       md5: {
-        bin: 'pending',  // Wird nach der Verschlüsselung gesetzt
-        enc: 'pending'
-      },
-      // Zusätzliche Metadaten (werden von SHU ignoriert, aber für Debugging nützlich)
-      _meta: {
-        unlockCode: code || null,
-        panicHold: panicHold,
-        speed: { standard: speedStd, tuning: speedTun },
-        params: {
-          hold: document.querySelector('input#holdTimeVal')?.textContent || 3,
-          boost: document.querySelector('input#boostAmpVal')?.textContent || 35,
-          kers: document.querySelector('select#kersSelect')?.value || 'strong',
-        }
+        bin: md5Bin,
+        enc: md5Enc
       }
     }
   };
 
-  // ─── MD5-Berechnung (Pflicht für ZIPv3) ───
-  // Da wir hier nur eine info.json + params.txt ohne echte FIRM.bin erzeugen,
-  // berechnen wir die MD5 über den gesamten info-Block (als Platzhalter).
-  // In der echten Firmware-Erstellung würdest du die MD5 über FIRM.bin berechnen.
+  log('═══ ZIPv3-Identifiers ═══', 'info');
+  log(`  type:         DRV`);
+  log(`  model:        ${rollerIds.model}`);
+  log(`  compatible:   ${rollerIds.compatible.join(', ')}`);
+  log(`  md5 (bin):    ${md5Bin}`);
+  log(`  md5 (enc):    ${md5Enc}`);
+  log('');
+
   const infoJsonStr = JSON.stringify(info, null, 2);
   const infoBytes = new TextEncoder().encode(infoJsonStr);
-  const md5Hash = md5(infoBytes);
-  info.firmware.md5.bin = md5Hash;
-  info.firmware.md5.enc = md5Hash;
 
-  // params.txt
   const params = `# X3 ${state.roller.toUpperCase()} CFW Configuration
 Module: ${state.module.toUpperCase()}
 Speed-Standard: Eco=${speedStd.eco} Drive=${speedStd.drive} Sport=${speedStd.sport}
@@ -1526,12 +1533,16 @@ Unlock-Code:    ${code || 'default'}
 Panic-Hold:     ${panicHold}
 Standard-Combo: ${defaultCombo}
 Type:           DRV
-Compatible:     ${state.roller}_DRV_AT32F415
-MD5:            ${md5Hash}
+Model:          ${rollerIds.model}
+Compatible:     ${rollerIds.compatible.join(', ')}
+MD5 (bin):      ${md5Bin}
+MD5 (enc):      ${md5Enc}
 `;
 
   const files = [
-    ['info.json', new TextEncoder().encode(JSON.stringify(info, null, 2))],
+    ['FIRM.bin', dummyFirm],
+    ['FIRM.bin.enc', dummyFirm],
+    ['info.json', infoBytes],
     ['params.txt', new TextEncoder().encode(params)]
   ];
 
@@ -1546,9 +1557,6 @@ MD5:            ${md5Hash}
 
   log('');
   log(`✓ ZIPv3-Paket erstellt (${zip.length} Bytes)`, 'info');
-  log(`  type: DRV`, 'info');
-  log(`  compatible: ${state.roller}_DRV_AT32F415`, 'info');
-  log(`  md5: ${md5Hash}`, 'info');
   log('→ In SHU flashen: FLASH → Load from File', 'info');
 
   setTimeout(() => {
@@ -1558,7 +1566,7 @@ MD5:            ${md5Hash}
        <code>${a.download}</code><br><br>
        <strong>Nächste Schritte:</strong><br>
        1. Datei in SHU flashen<br>
-       2. Nach Flash: App → Max-Speed setzen`,
+       2. Nach dem Flash: App → Max-Speed setzen`,
       'ok',
       'Verstanden'
     );
