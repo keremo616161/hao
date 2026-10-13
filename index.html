@@ -2,521 +2,1233 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZT3 Pro CFW Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>X3 Builder</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   :root {
-    --bg: #0a0c12;
-    --panel: #12151d;
-    --card: #171b24;
-    --card-hover: #1c2029;
-    --border: #232834;
-    --accent: #6c5ce7;
-    --accent-glow: #8b7cf0;
-    --accent-dim: #4a3fa8;
+    --bg: #0a0a12;
+    --panel: #13131f;
+    --card: #1a1a26;
+    --card2: #202030;
+    --border: #262636;
+    --accent: #5b4dff;
+    --accent2: #7c6dff;
+    --text: #ffffff;
+    --muted: #7a7a8c;
+    --dim: #3a3a4a;
     --green: #00d68f;
     --red: #ff4757;
     --warn: #ffb800;
     --info: #4da6ff;
-    --text: #e8eaf0;
-    --muted: #6b7280;
-    --dim: #3a3f4d;
-    --sidebar-w: 260px;
+    --sidebar-w: 280px;
   }
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  html, body {
     background: var(--bg);
     color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
   }
 
-  /* ═══ HAMBURGER TOGGLE ═══ */
-  .toggle-btn {
+  /* ═══ BLUR WRAPPER ═══ */
+  .blur-wrap {
+    transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 100vh;
+    padding-bottom: 120px;
+  }
+  .blur-wrap.blurred {
+    filter: blur(12px) saturate(0.7);
+    pointer-events: none;
+    transform: scale(0.98);
+  }
+
+  /* ═══ HAMBURGER ═══ */
+  .hamburger {
     position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    width: 44px;
-    height: 44px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
+    top: 16px;
+    left: 16px;
+    width: 42px;
+    height: 42px;
+    z-index: 999;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 5px;
+    cursor: pointer;
+    border-radius: 12px;
+    background: rgba(26, 26, 38, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .toggle-btn:hover {
-    background: var(--card-hover);
-    border-color: var(--accent);
-    box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
-  }
-  .toggle-btn span {
+  .hamburger:hover { border-color: var(--accent); }
+  .hamburger span {
     display: block;
-    width: 20px;
+    width: 18px;
     height: 2px;
     background: var(--text);
     border-radius: 2px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: center;
   }
-  .toggle-btn.active span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-    background: var(--accent-glow);
-  }
-  .toggle-btn.active span:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-  .toggle-btn.active span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-    background: var(--accent-glow);
-  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); background: var(--accent2); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); background: var(--accent2); }
 
   /* ═══ SIDEBAR ═══ */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
+    bottom: 0;
     width: var(--sidebar-w);
-    height: 100vh;
     background: var(--panel);
     border-right: 1px solid var(--border);
-    padding: 80px 0 20px;
-    z-index: 900;
-    transform: translateX(0);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow-y: auto;
-    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
-  }
-  .sidebar.collapsed {
+    z-index: 998;
     transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 72px 16px 24px;
+    overflow-y: auto;
+    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.5);
   }
-  .sidebar-header {
-    padding: 0 24px 24px;
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-logo {
+    padding: 0 8px 20px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 16px;
   }
-  .sidebar-header h1 {
-    font-size: 1.15rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--accent-glow), var(--green));
+  .sidebar-logo h1 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    font-style: italic;
+    background: linear-gradient(135deg, #fff, #7c6dff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: -0.5px;
   }
-  .sidebar-header p {
+  .sidebar-logo p {
     font-size: 0.7rem;
     color: var(--muted);
-    margin-top: 4px;
-    letter-spacing: 0.5px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
+    margin-top: 2px;
   }
-  .nav-item {
-    padding: 12px 24px;
-    cursor: pointer;
-    font-size: 0.88rem;
-    color: var(--muted);
+  .sidebar-item {
     display: flex;
     align-items: center;
     gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--muted);
     transition: all 0.2s;
-    position: relative;
+    margin-bottom: 2px;
     font-weight: 500;
   }
-  .nav-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 0;
-    background: var(--accent);
-    border-radius: 0 3px 3px 0;
-    transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  .sidebar-item:hover { background: var(--card); color: var(--text); }
+  .sidebar-item.active {
+    background: linear-gradient(135deg, rgba(91, 77, 255, 0.2), rgba(124, 109, 255, 0.1));
+    color: var(--accent2);
+    font-weight: 600;
   }
-  .nav-item:hover { background: rgba(108, 92, 231, 0.06); color: var(--text); }
-  .nav-item.active {
-    background: linear-gradient(90deg, rgba(108, 92, 231, 0.15), transparent);
-    color: var(--accent-glow);
+  .sidebar-item .icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
   }
-  .nav-item.active::before { height: 60%; }
-  .nav-item .icon { font-size: 1.05rem; width: 22px; text-align: center; }
-  .nav-item .label { flex: 1; }
 
   /* ═══ OVERLAY ═══ */
   .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 850;
+    z-index: 997;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s;
-    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0.3);
   }
-  .overlay.active {
-    opacity: 1;
-    pointer-events: auto;
+  .overlay.active { opacity: 1; pointer-events: auto; }
+
+  /* ═══ HEADER ═══ */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    font-style: italic;
+    background: linear-gradient(135deg, #fff, #999);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-left: 52px;
+  }
+  .lang-switch {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .lang-btn {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+  }
+  .lang-btn.active { background: var(--card2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+  /* ═══ TOP TABS ═══ */
+  .top-tabs {
+    display: flex;
+    gap: 24px;
+    padding: 0 20px 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .top-tab {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    padding-bottom: 10px;
+    position: relative;
+    transition: color 0.2s;
+  }
+  .top-tab.active { color: var(--text); }
+  .top-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
   }
 
-  /* ═══ MAIN ═══ */
-  .main {
-    padding: 80px 40px 40px;
-    max-width: 1000px;
-    margin: 0 auto;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .page { display: none; animation: fadeIn 0.35s ease-out; }
+  /* ═══ PAGE ═══ */
+  .page { display: none; animation: pageIn 0.35s ease-out; }
   .page.active { display: block; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  .page-header { margin-bottom: 24px; }
-  .page-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -0.5px;
-    margin-bottom: 4px;
+  /* ═══ SECTION ═══ */
+  .section { padding: 0 20px; margin-bottom: 24px; }
+  .section-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    text-transform: uppercase;
   }
-  .page-header p { font-size: 0.85rem; color: var(--muted); }
+
+  /* ═══ ROLLER GRID ═══ */
+  .roller-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .roller-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .roller-card:hover { border-color: var(--dim); transform: translateY(-2px); }
+  .roller-card.active {
+    background: linear-gradient(135deg, #2a1f5c 0%, #1a1530 100%);
+    border-color: var(--accent);
+    box-shadow: 0 0 40px rgba(91, 77, 255, 0.35);
+  }
+  .roller-card.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(124, 109, 255, 0.25), transparent 60%);
+    pointer-events: none;
+  }
+  .check-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    animation: popIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+  .roller-card.active .check-badge { display: flex; }
+  .check-badge::after {
+    content: '';
+    width: 10px;
+    height: 6px;
+    border-left: 2.5px solid #fff;
+    border-bottom: 2.5px solid #fff;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+  .roller-img {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.8rem;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  }
+  .roller-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ═══ MODULE TABS ═══ */
+  .module-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 5px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 20px;
+  }
+  .module-tab {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.25s;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+  }
+  .module-tab.active {
+    background: var(--card2);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
 
   /* ═══ CARDS ═══ */
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 14px;
-    transition: all 0.25s;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
   }
   .card:hover { border-color: var(--dim); }
-  .card-title {
-    font-size: 0.7rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    margin-bottom: 16px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card-title .num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    background: var(--accent-dim);
-    color: var(--accent-glow);
-    border-radius: 6px;
-    font-size: 0.65rem;
-    font-weight: 700;
-  }
-
-  /* ═══ FORM ═══ */
-  label {
+  .card-body { padding: 18px; }
+  .card-header {
+    padding: 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 0;
-    font-size: 0.85rem;
-  }
-  label .lbl { color: var(--text); }
-  label .hint { font-size: 0.7rem; color: var(--muted); margin-left: 6px; }
-  select, input[type="number"], input[type="text"] {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.83rem;
-    outline: none;
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-  select:focus, input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
-  }
-  input[type="checkbox"] {
-    appearance: none;
-    width: 40px;
-    height: 22px;
-    background: var(--dim);
-    border-radius: 11px;
-    position: relative;
     cursor: pointer;
-    transition: background 0.25s;
+    user-select: none;
+    transition: background 0.15s;
   }
-  input[type="checkbox"]::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
+  .card-header:hover { background: rgba(255,255,255,0.02); }
+  .card-header h3 { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+  .chevron {
     width: 18px;
     height: 18px;
-    background: #fff;
-    border-radius: 50%;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  input[type="checkbox"]:checked { background: var(--accent); }
-  input[type="checkbox"]:checked::after { transform: translateX(18px); }
-  input[type="checkbox"]:disabled { opacity: 0.4; cursor: not-allowed; }
+  .chevron::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg);
+    transition: all 0.35s;
+  }
+  .card.collapsed .chevron { transform: rotate(-180deg); }
+  .card-content {
+    max-height: 3000px;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s;
+    opacity: 1;
+  }
+  .card.collapsed .card-content { max-height: 0; opacity: 0; }
+  .card-content-inner { padding: 0 18px 18px; }
 
-  input[type="file"] {
-    background: var(--panel);
-    border: 2px dashed var(--border);
-    padding: 20px;
-    border-radius: 12px;
-    width: 100%;
-    color: var(--muted);
+  /* ═══ STOCK ROW ═══ */
+  .stock-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
     cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-    font-family: inherit;
+    transition: border-color 0.2s;
   }
-  input[type="file"]:hover { border-color: var(--accent); color: var(--text); }
+  .stock-row:hover { border-color: var(--accent); }
+  .stock-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--card2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--muted);
+  }
+  .stock-text { flex: 1; }
+  .stock-text h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 3px; }
+  .stock-text p { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
 
+  /* ═══ SLIDER ═══ */
+  .slider-group { padding: 12px 0; }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .slider-label span:first-child { font-size: 0.9rem; color: var(--text); }
+  .slider-label .val { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .slider-label .val small { font-size: 0.75rem; font-weight: 400; color: var(--muted); margin-left: 2px; }
   input[type="range"] {
     width: 100%;
     appearance: none;
-    height: 6px;
+    height: 4px;
     background: var(--dim);
-    border-radius: 3px;
+    border-radius: 2px;
     outline: none;
-    margin: 12px 0;
+    margin-top: 12px;
+    cursor: pointer;
   }
   input[type="range"]::-webkit-slider-thumb {
     appearance: none;
     width: 22px;
     height: 22px;
-    background: var(--accent);
+    background: #fff;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 12px rgba(108, 92, 231, 0.5);
-    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    transition: all 0.15s;
+    border: 3px solid var(--accent);
   }
-  input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.15);
-    box-shadow: 0 0 20px rgba(108, 92, 231, 0.8);
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--accent);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
 
-  /* ═══ BUTTONS ═══ */
-  .btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent-dim));
-    color: #fff;
-    border: none;
-    padding: 14px 24px;
-    border-radius: 10px;
-    font-size: 0.9rem;
+  .subsection-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 1.2px;
     font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.25s;
-    letter-spacing: 0.3px;
-    font-family: inherit;
+    margin: 20px 0 4px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  .btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4);
-  }
-  .btn:active:not(:disabled) { transform: translateY(0); }
-  .btn:disabled { background: var(--dim); color: var(--muted); cursor: not-allowed; }
-  .btn-sec {
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    margin-top: 8px;
-  }
-  .btn-sec:hover:not(:disabled) {
-    background: var(--card-hover);
-    border-color: var(--accent);
-    box-shadow: none;
+  .help-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--dim);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: var(--muted);
+    cursor: help;
+    text-transform: none;
   }
 
-  /* ═══ REGION GRID ═══ */
-  .region-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
+  /* ═══ TOGGLE ═══ */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 0.9rem;
+    gap: 12px;
   }
-  .region-card {
-    padding: 16px 12px;
-    border-radius: 12px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.25s;
+  .toggle-row span:first-child { color: var(--text); }
+  .toggle {
     position: relative;
-    overflow: hidden;
+    width: 44px;
+    height: 26px;
+    background: var(--dim);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.25s;
+    flex-shrink: 0;
   }
-  .region-card:hover { border-color: var(--dim); transform: translateY(-2px); }
-  .region-card.active {
-    border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(0, 214, 143, 0.05));
-  }
-  .region-card.active::before {
+  .toggle::after {
     content: '';
     position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top right, rgba(108, 92, 231, 0.2), transparent 60%);
-    pointer-events: none;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   }
-  .region-card .flag { font-size: 1.5rem; margin-bottom: 6px; }
-  .region-card .name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
-  .region-card .speed { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
-  .region-card.active .name { color: var(--accent-glow); }
+  .toggle.on { background: var(--accent); }
+  .toggle.on::after { transform: translateX(18px); }
 
-  /* ═══ SPEED DISPLAY ═══ */
-  .speed-hero { text-align: center; margin: 8px 0 12px; }
-  .speed-hero .val {
-    font-size: 3rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent-glow), var(--green));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -2px;
-    line-height: 1;
+  /* ═══ SELECT ═══ */
+  select, input[type="text"] {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    outline: none;
+    font-family: inherit;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.2s;
   }
-  .speed-hero .unit { font-size: 1rem; color: var(--muted); font-weight: 500; }
-  .slider-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.68rem;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-  .slider-labels .theo { opacity: 0.5; font-style: italic; }
+  select:focus, input[type="text"]:focus { border-color: var(--accent); }
 
-  /* ═══ LOG ═══ */
-  .log-box {
-    background: #060810;
+  /* ═══ CODE EDITOR ═══ */
+  .code-display {
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px;
+    padding: 18px;
+    text-align: center;
+    font-size: 1.4rem;
+    min-height: 64px;
+    margin-bottom: 14px;
+    letter-spacing: 10px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: 'SF Mono', monospace;
+    transition: all 0.2s;
+  }
+  .code-display.has-code {
+    color: var(--accent2);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(91, 77, 255, 0.15);
+  }
+  .code-btn-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .code-btn {
+    padding: 14px 8px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 1.3rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .code-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(91, 77, 255, 0.3);
+  }
+  .code-btn:active { transform: translateY(0); }
+  .code-btn small {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0;
+  }
+  .code-btn:hover small { color: rgba(255,255,255,0.8); }
+  .code-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .code-actions button {
+    flex: 1;
+    padding: 10px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .code-actions button:hover { color: var(--text); border-color: var(--dim); }
+  .code-legend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 4px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .code-length-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .code-length-bar .prog {
+    flex: 1;
+    height: 4px;
+    background: var(--dim);
+    border-radius: 2px;
+    margin-left: 12px;
+    overflow: hidden;
+  }
+  .code-length-bar .prog-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  /* ═══ MAIN BUTTON ═══ */
+  .main-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    z-index: 200;
+    font-family: inherit;
+    letter-spacing: 0.3px;
+    box-shadow: 0 8px 30px rgba(91, 77, 255, 0.4);
+  }
+  .main-btn:hover:not(:disabled) { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(91, 77, 255, 0.5); }
+  .main-btn:active:not(:disabled) { transform: translateY(0); }
+  .main-btn:disabled { background: var(--dim); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+
+  /* ═══ LOG BOX ═══ */
+  .log-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
     font-family: 'SF Mono', 'Consolas', monospace;
-    font-size: 0.75rem;
-    max-height: 300px;
+    font-size: 0.72rem;
+    max-height: 220px;
     overflow-y: auto;
-    white-space: pre-wrap;
     color: var(--green);
     line-height: 1.7;
-    margin-top: 16px;
+    white-space: pre-wrap;
+    margin-top: 12px;
   }
   .log-box .err { color: var(--red); }
   .log-box .warn { color: var(--warn); }
   .log-box .info { color: var(--info); }
+  .log-box .dim { color: var(--muted); }
 
-  /* ═══ CHIPS ═══ */
-  .status-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-  .chip {
-    font-size: 0.72rem;
-    padding: 5px 12px;
-    border-radius: 20px;
-    background: var(--panel);
-    color: var(--muted);
+  /* ═══ MODAL ═══ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 500px;
+    padding: 28px 24px;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(91, 77, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 18px;
+  }
+  .modal-icon.ok { background: rgba(0, 214, 143, 0.15); }
+  .modal-icon.err { background: rgba(255, 71, 87, 0.15); }
+  .modal-icon.warn { background: rgba(255, 184, 0, 0.15); }
+  .modal h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; }
+  .modal p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  .modal code {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.8rem;
+    background: var(--bg);
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: var(--accent2);
+  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+  .modal-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .modal-btn.primary { background: var(--accent); color: #fff; }
+  .modal-btn.primary:hover { background: var(--accent2); }
+  .modal-btn.secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+  .modal-btn.secondary:hover { background: var(--dim); }
+
+  /* ═══ INFO PAGE ═══ */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .info-card {
+    background: var(--card);
     border: 1px solid var(--border);
-    font-weight: 500;
-    transition: all 0.25s;
+    border-radius: 14px;
+    padding: 18px;
   }
-  .chip.on {
-    background: rgba(0, 214, 143, 0.1);
-    color: var(--green);
-    border-color: rgba(0, 214, 143, 0.3);
+  .info-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+  .info-card p { font-size: 0.83rem; color: var(--muted); line-height: 1.7; }
+  .info-card code {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.75rem;
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent2);
   }
-  .chip.warn {
-    background: rgba(255, 184, 0, 0.1);
-    color: var(--warn);
-    border-color: rgba(255, 184, 0, 0.3);
-  }
+  .info-card ol { padding-left: 20px; }
+  .info-card li { font-size: 0.83rem; color: var(--muted); line-height: 1.8; margin-bottom: 6px; }
 
-  /* ═══ INFO BOXES ═══ */
-  .warnbox {
-    background: rgba(255, 184, 0, 0.06);
-    border: 1px solid rgba(255, 184, 0, 0.25);
-    border-radius: 10px;
-    padding: 14px 16px;
-    font-size: 0.8rem;
-    color: var(--warn);
-    margin-top: 16px;
-    line-height: 1.6;
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--card2);
+    color: var(--muted);
+    margin-right: 6px;
+    margin-bottom: 6px;
+    border: 1px solid var(--border);
   }
-  .infobox {
-    background: rgba(77, 166, 255, 0.06);
-    border: 1px solid rgba(77, 166, 255, 0.25);
-    border-radius: 10px;
-    padding: 14px 16px;
-    font-size: 0.8rem;
-    color: var(--info);
-    margin-top: 12px;
-    line-height: 1.6;
-  }
+  .badge.green { background: rgba(0, 214, 143, 0.1); color: var(--green); border-color: rgba(0, 214, 143, 0.3); }
+  .badge.purple { background: rgba(91, 77, 255, 0.1); color: var(--accent2); border-color: rgba(91, 77, 255, 0.3); }
 
   .hidden { display: none !important; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  /* ═══ PREVIEW TABLE ═══ */
-  .preview-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-  .preview-table td { padding: 8px 0; border-bottom: 1px solid var(--border); }
-  .preview-table td:first-child { color: var(--muted); width: 45%; }
-  .preview-table td:last-child { font-family: 'SF Mono', monospace; color: var(--text); }
-  .preview-table tr:last-child td { border-bottom: none; }
-  .preview-table .val-on { color: var(--green); }
-  .preview-table .val-off { color: var(--muted); }
-
-  /* ═══ ERROR DB ═══ */
-  .error-item {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.84rem;
-  }
-  .error-item:last-child { border-bottom: none; }
-  .error-code {
-    display: inline-block;
-    background: rgba(255, 71, 87, 0.15);
-    color: var(--red);
-    padding: 2px 10px;
-    border-radius: 6px;
-    font-family: 'SF Mono', monospace;
-    font-weight: 700;
-    font-size: 0.75rem;
-    margin-right: 10px;
-  }
-  .error-fix {
-    color: var(--muted);
-    font-size: 0.75rem;
-    margin-top: 4px;
-    margin-left: 44px;
-  }
-
-  /* ═══ RESPONSIVE ═══ */
-  @media (max-width: 800px) {
-    .main { padding: 80px 16px 40px; }
-    .grid2 { grid-template-columns: 1fr; }
-    .region-grid { grid-template-columns: repeat(2, 1fr); }
-    .speed-hero .val { font-size: 2.4rem; }
-  }
+  .fade-in { animation: fadeIn 0.4s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
 
+<!-- ═══ BLUR WRAPPER ═══ -->
+<div class="blur-wrap" id="blurWrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">X3</div>
+    <div class="lang-switch">
+      <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+      <button class="lang-btn active" onclick="setLang('de', this)">DE</button>
+    </div>
+  </div>
+
+  <!-- TOP TABS -->
+  <div class="top-tabs">
+    <div class="top-tab active" onclick="switchTopTab('builder', this)">Builder</div>
+    <div class="top-tab" onclick="switchTopTab('info', this)">Info</div>
+  </div>
+
+  <!-- ═══ BUILDER PAGE ═══ -->
+  <div class="page active" id="page-builder">
+
+    <!-- ROLLER SELECTION -->
+    <div class="section">
+      <div class="section-label">01 Roller</div>
+      <div class="roller-grid">
+        <div class="roller-card" data-model="g3" onclick="pickRoller('g3', this)">
+          <div class="check-badge"></div>
+          <div class="roller-img">🛴</div>
+          <div class="roller-name">G3 Max</div>
+        </div>
+        <div class="roller-card active" data-model="zt3" onclick="pickRoller('zt3', this)">
+          <div class="check-badge"></div>
+          <div class="roller-img">🛴</div>
+          <div class="roller-name">ZT3 Pro</div>
+        </div>
+        <div class="roller-card" data-model="f3" onclick="pickRoller('f3', this)">
+          <div class="check-badge"></div>
+          <div class="roller-img">🛴</div>
+          <div class="roller-name">F3 / F3 Pro</div>
+        </div>
+        <div class="roller-card" data-model="gt3d" onclick="pickRoller('gt3d', this)">
+          <div class="check-badge"></div>
+          <div class="roller-img">🛴</div>
+          <div class="roller-name">GT3D</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURATION -->
+    <div class="section" id="configSection">
+      <div class="section-label">02 Modul</div>
+      <div class="module-tabs">
+        <button class="module-tab active" onclick="switchModule('vcu', this)">VCU</button>
+        <button class="module-tab" onclick="switchModule('mcu', this)">MCU</button>
+        <button class="module-tab" onclick="switchModule('ble', this)">BLE</button>
+        <button class="module-tab" onclick="switchModule('bms', this)">BMS</button>
+      </div>
+
+      <div class="section-label">03 Einstellungen</div>
+
+      <!-- STOCK FIRMWARE -->
+      <div class="stock-row" onclick="revertStock()">
+        <div class="stock-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/>
+          </svg>
+        </div>
+        <div class="stock-text">
+          <h4>Stock-Firmware</h4>
+          <p>Unveränderte Werks-Firmware für das gewählte Ziel herunterladen.</p>
+        </div>
+      </div>
+
+      <!-- GESCHWINDIGKEITSGRENZEN -->
+      <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Geschwindigkeitsgrenzen</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+
+            <div class="subsection-label">
+              Standard-Profil <span class="help-icon">?</span>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label"><span>Eco</span><span class="val"><span id="ecoStdVal">15</span> <small>km/h</small></span></div>
+              <input type="range" min="5" max="60" value="15" oninput="updateSlider('ecoStd', this.value)">
+            </div>
+            <div class="slider-group">
+              <div class="slider-label"><span>Drive</span><span class="val"><span id="driveStdVal">20</span> <small>km/h</small></span></div>
+              <input type="range" min="5" max="60" value="20" oninput="updateSlider('driveStd', this.value)">
+            </div>
+            <div class="slider-group">
+              <div class="slider-label"><span>Sport</span><span class="val"><span id="sportStdVal">22</span> <small>km/h</small></span></div>
+              <input type="range" min="5" max="60" value="22" oninput="updateSlider('sportStd', this.value)">
+            </div>
+
+            <div class="subsection-label" style="margin-top:28px;">
+              Tuning-Profil <span class="help-icon">?</span>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label"><span>Eco</span><span class="val"><span id="ecoTunVal">22</span> <small>km/h</small></span></div>
+              <input type="range" min="5" max="127" value="22" oninput="updateSlider('ecoTun', this.value)">
+            </div>
+            <div class="slider-group">
+              <div class="slider-label"><span>Drive</span><span class="val"><span id="driveTunVal">40</span> <small>km/h</small></span></div>
+              <input type="range" min="5" max="127" value="40" oninput="updateSlider('driveTun', this.value)">
+            </div>
+            <div class="slider-group">
+              <div class="slider-label"><span>Sport</span><span class="val"><span id="sportTunVal">100</span> <small>km/h</small></span></div>
+              <input type="range" min="5" max="127" value="100" oninput="updateSlider('sportTun', this.value)">
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- UNLOCK-CODE EDITOR -->
+      <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>🔓 Unlock-Code (Tastenkombination)</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+
+            <div class="code-length-bar">
+              <span>Code-Länge: <strong id="codeLen" style="color:var(--accent2);">0</strong> / 10</span>
+              <div class="prog"><div class="prog-fill" id="codeProg"></div></div>
+            </div>
+
+            <div class="code-display" id="codeDisplay">—</div>
+
+            <div class="code-btn-grid">
+              <button class="code-btn" onclick="addCode('L')">←<small>Links</small></button>
+              <button class="code-btn" onclick="addCode('R')">→<small>Rechts</small></button>
+              <button class="code-btn" onclick="addCode('M')">↑<small>Mode</small></button>
+              <button class="code-btn" onclick="addCode('P')">↓<small>Power</small></button>
+            </div>
+
+            <div class="code-actions">
+              <button onclick="removeLastCode()">⌫ Löschen</button>
+              <button onclick="clearCode()">✕ Reset</button>
+            </div>
+
+            <div class="code-legend">
+              <span>← Blinker links</span>
+              <span>→ Blinker rechts</span>
+              <span>↑ Mode</span>
+              <span>↓ Power</span>
+            </div>
+
+            <div class="toggle-row" style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border);">
+              <span>Panic-Button: Halten statt Drücken</span>
+              <div class="toggle" id="panicHoldToggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+
+            <div class="toggle-row">
+              <span>Standard-Kombi (Gas + Bremse) zusätzlich</span>
+              <div class="toggle on" id="defaultComboToggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILWECHSEL -->
+      <div class="card collapsed">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Profilwechsel</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <div class="toggle-row">
+              <span>Automatischer Profilwechsel bei Code-Eingabe</span>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <span>Bestätigungston beim Wechsel</span>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOLD-MODUS -->
+      <div class="card collapsed">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Hold-Modus</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <div class="toggle-row">
+              <span>Hold-Modus aktivieren (Gas halten bei Stillstand)</span>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="slider-group" style="padding-top:8px;">
+              <div class="slider-label"><span>Haltezeit</span><span class="val"><span id="holdTimeVal">3</span> <small>s</small></span></div>
+              <input type="range" min="1" max="10" value="3" oninput="updateSlider('holdTime', this.value)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOOST-MODUS -->
+      <div class="card collapsed">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Boost-Modus</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <div class="toggle-row">
+              <span>Boost beim Anfahren (10s Vollgas)</span>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="slider-group" style="padding-top:8px;">
+              <div class="slider-label"><span>Boost-Strom</span><span class="val"><span id="boostAmpVal">35</span> <small>A</small></span></div>
+              <input type="range" min="15" max="60" value="35" oninput="updateSlider('boostAmp', this.value)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEMPOMAT -->
+      <div class="card collapsed">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Tempomat</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <div class="toggle-row">
+              <span>Tempomat aktivieren</span>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <span>Auch bei Sport-Profil</span>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REKUPERATION -->
+      <div class="card collapsed">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Rekuperation (KERS)</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <select id="kersSelect">
+              <option value="off">Aus</option>
+              <option value="weak">Schwach</option>
+              <option value="strong" selected>Stark</option>
+            </select>
+            <div class="slider-group" style="padding-top:12px;">
+              <div class="slider-label"><span>Ladeleistung</span><span class="val"><span id="kersVal">70</span> <small>%</small></span></div>
+              <input type="range" min="0" max="100" value="70" oninput="updateSlider('kers', this.value)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REICHWEITE -->
+      <div class="card collapsed">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Reichweite</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <div class="toggle-row">
+              <span>Reichweiten-Optimierung (sanftere Kurve)</span>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <span>Akku-schonender Lademodus</span>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BELEUCHTUNG -->
+      <div class="card collapsed">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Beleuchtung</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <select>
+              <option>Stock</option>
+              <option>Immer an</option>
+              <option>Immer aus</option>
+              <option>Nur bei Bremsen</option>
+            </select>
+            <div class="toggle-row" style="margin-top:8px;">
+              <span>Bremslicht blinken</span>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VERSCHLÜSSELUNG -->
+      <div class="card collapsed">
+        <div class="card-header" onclick="toggleCard(this)">
+          <h3>Verschlüsselung</h3>
+          <div class="chevron"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <input type="text" id="keyInput" placeholder="Unlock-Key (Hex, 32 Zeichen)" style="font-family:monospace; font-size:0.75rem;">
+            <div style="margin-top:12px;">
+              <select id="variantSelect">
+                <option value="xtea">XTEA (neuere Firmware)</option>
+                <option value="tea">TEA (ältere Firmware)</option>
+              </select>
+            </div>
+            <div style="margin-top:12px;">
+              <select id="encModeSelect">
+                <option value="both">both (plain + encrypted)</option>
+                <option value="encrypted">encrypted</option>
+                <option value="plain">plain</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div class="log-box" id="logBox">Bereit. Wähle einen Roller.</div>
+
+    </div>
+  </div>
+
+  <!-- ═══ INFO PAGE ═══ -->
+  <div class="page" id="page-info">
+    <div class="section">
+      <div class="section-label">Über X3 Builder</div>
+      <div class="info-grid">
+
+        <div class="info-card">
+          <h3>⚡ Ultimate Firmware Builder</h3>
+          <p>Erstelle Custom Firmware für die Ninebot X3-Serie mit vollständiger Modul-Unterstützung, individuellem Unlock-Code und ZIPv3-konformem Output.</p>
+          <div style="margin-top:12px;">
+            <span class="badge purple">v10.0</span>
+            <span class="badge green">ZIPv3</span>
+            <span class="badge">MD5</span>
+            <span class="badge">XTEA</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>🛴 Kompatible Roller</h3>
+          <p>
+            <span class="badge">G3 Max</span>
+            <span class="badge">ZT3 Pro</span>
+            <span class="badge">F3 / F3 Pro</span>
+            <span class="badge">GT3D</span>
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>📖 Flash-Anleitung</h3>
+          <ol>
+            <li>Segway-App öffnen → Scooter entkoppeln</li>
+            <li>SHU installieren: <code>utility-beta.cfw.sh</code></li>
+            <li>VPN aktivieren (außerhalb DE)</li>
+            <li>Per Bluetooth mit Scooter verbinden</li>
+            <li>FLASH → Load from File → ZIP wählen</li>
+            <li>Nach Flash: App → Max-Speed setzen</li>
+          </ol>
+        </div>
+
+        <div class="info-card">
+          <h3>🔓 Unlock-Code</h3>
+          <p>Wähle eine Tastenkombination aus bis zu 10 Tasten (Blinker links/rechts, Mode, Power). Der Code wird während der Fahrt eingegeben und aktiviert das Tuning-Profil. Zurück zum Standard: Code erneut eingeben.</p>
+        </div>
+
+        <div class="info-card">
+          <h3>⚠️ Warnhinweise</h3>
+          <p>
+            <span style="color:var(--red);">•</span> VCU-Version muss ≤ 1.4.10 sein<br>
+            <span style="color:var(--red);">•</span> Vor Flash in der App entkoppeln<br>
+            <span style="color:var(--red);">•</span> Flash-Reihenfolge: Erst VCU, dann MCU<br>
+            <span style="color:var(--red);">•</span> Cross-Flash zwischen Modellen kann bricken
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ MAIN BUTTON ═══ -->
+<button class="main-btn" id="mainBtn" onclick="buildFirmware()">Firmware erstellen</button>
+
 <!-- ═══ HAMBURGER ═══ -->
-<div class="toggle-btn active" id="toggleBtn" onclick="toggleSidebar()">
+<div class="hamburger" id="hamburger" onclick="toggleSidebar()">
   <span></span><span></span><span></span>
 </div>
 
@@ -524,207 +1236,50 @@
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
 <!-- ═══ SIDEBAR ═══ -->
-<nav class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <h1>⚡ ZT3 Builder</h1>
-    <p>Ultimate v9.0</p>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h1>X3</h1>
+    <p>Builder v10</p>
   </div>
-  <div class="nav-item active" onclick="nav('build', this)">
-    <span class="icon">🔧</span><span class="label">Firmware bauen</span>
+  <div class="sidebar-item active" onclick="sidebarNav('builder', this)">
+    <span class="icon">🔧</span><span>Firmware bauen</span>
   </div>
-  <div class="nav-item" onclick="nav('dashboard', this)">
-    <span class="icon">📊</span><span class="label">Vorschau</span>
+  <div class="sidebar-item" onclick="sidebarNav('presets', this)">
+    <span class="icon">⚡</span><span>Presets</span>
   </div>
-  <div class="nav-item" onclick="nav('errors', this)">
-    <span class="icon">⚠️</span><span class="label">Fehlercodes</span>
+  <div class="sidebar-item" onclick="sidebarNav('errors', this)">
+    <span class="icon">⚠️</span><span>Fehlercodes</span>
   </div>
-  <div class="nav-item" onclick="nav('guide', this)">
-    <span class="icon">📖</span><span class="label">Flash-Anleitung</span>
+  <div class="sidebar-item" onclick="sidebarNav('guide', this)">
+    <span class="icon">📖</span><span>Flash-Anleitung</span>
   </div>
-</nav>
+  <div class="sidebar-item" onclick="sidebarNav('about', this)">
+    <span class="icon">ℹ️</span><span>Über</span>
+  </div>
+</div>
 
-<!-- ═══ MAIN ═══ -->
-<main class="main">
-
-  <!-- PAGE: BUILD -->
-  <div id="page-build" class="page active">
-    <div class="page-header">
-      <h2>Firmware bauen</h2>
-      <p>VCU/MCU Custom Firmware für ZT3 Pro · ZIPv3-konform</p>
-    </div>
-
-    <div class="status-bar">
-      <span class="chip" id="chipVcu">VCU: —</span>
-      <span class="chip" id="chipKey">Key: —</span>
-      <span class="chip on" id="chipSpeed">Speed: 40 km/h</span>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="num">1</span> Firmware-Quelle</div>
-      <input type="file" id="vcuFile" accept=".bin,.zip">
-      <div id="vcuInfo" class="hidden" style="margin-top:12px;">
-        <span class="chip on">✓ geladen</span>
-        <span id="vcuName" style="margin-left:8px; color:var(--muted); font-size:0.8rem;"></span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="num">2</span> Region &amp; Geschwindigkeit</div>
-      <div class="region-grid">
-        <div class="region-card active" data-region="U" onclick="pickRegion('U', this)">
-          <div class="flag">🇺🇸</div><div class="name">USA</div><div class="speed">40 km/h · Panic</div>
-        </div>
-        <div class="region-card" data-region="E" onclick="pickRegion('E', this)">
-          <div class="flag">🇪🇺</div><div class="name">Europa</div><div class="speed">25 km/h</div>
-        </div>
-        <div class="region-card" data-region="D" onclick="pickRegion('D', this)">
-          <div class="flag">🇩🇪</div><div class="name">Deutschland</div><div class="speed">20 km/h</div>
-        </div>
-        <div class="region-card" data-region="Z" onclick="pickRegion('Z', this)">
-          <div class="flag">🌏</div><div class="name">Asien</div><div class="speed">32 km/h</div>
-        </div>
-      </div>
-      <div class="speed-hero">
-        <span class="val" id="speedVal">40</span><span class="unit"> km/h</span>
-      </div>
-      <input type="range" id="speedSlider" min="5" max="127" value="40" step="1" oninput="setSpeed(this.value)">
-      <div class="slider-labels">
-        <span>5</span><span>25</span><span>40</span><span>60</span><span class="theo">127</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="num">3</span> Features</div>
-      <div class="grid2">
-        <div>
-          <label><span class="lbl">🚨 Panic Button</span><input type="checkbox" id="panic" checked disabled></label>
-          <label><span class="lbl">⚡ Power-Modus</span><input type="checkbox" id="powerMode" checked></label>
-          <label><span class="lbl">🔄 Tempomat</span><input type="checkbox" id="cruise"></label>
-          <label><span class="lbl">🚀 Zero Start</span><input type="checkbox" id="zeroStart"></label>
-        </div>
-        <div>
-          <label><span class="lbl">🔋 KERS</span>
-            <select id="kers"><option value="">Stock</option><option value="off">Aus</option><option value="weak">Schwach</option><option value="strong" selected>Stark</option></select>
-          </label>
-          <label><span class="lbl">💡 Licht</span>
-            <select id="lighting"><option value="">Stock</option><option value="always_on">Immer an</option><option value="always_off">Immer aus</option><option value="brake_only">Nur Bremsen</option></select>
-          </label>
-          <label><span class="lbl">🔔 Piepton</span>
-            <select id="beeper"><option value="stock">Stock</option><option value="off">Aus</option><option value="soft">Leise</option></select>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="num">4</span> Verschlüsselung</div>
-      <label><span class="lbl">Unlock-Key (Hex)</span>
-        <input type="text" id="key" placeholder="auto aus 0x1420" style="width:200px; font-family:monospace; font-size:0.72rem;"></label>
-      <label><span class="lbl">Verschlüsselung</span>
-        <select id="variant"><option value="xtea">XTEA (neu)</option><option value="tea">TEA (alt)</option></select></label>
-      <label><span class="lbl">ZIPv3-Modus</span>
-        <select id="encMode"><option value="both">both</option><option value="encrypted">encrypted</option><option value="plain">plain</option></select></label>
-    </div>
-
-    <button class="btn" id="buildBtn" disabled>🔧 Firmware bauen &amp; ZIPv3 erstellen</button>
-    <button class="btn btn-sec" id="revertBtn" disabled>↩ Revert to Stock</button>
-
-    <div class="log-box" id="log">Bereit. Lade eine VCU-Firmware.</div>
-
-    <div class="warnbox">
-      ⚠️ <strong>Flash-Reihenfolge:</strong> Erst VCU, dann MCU. VCU ≤ 1.4.10. Vor Flash in der Segway-App entkoppeln!
+<!-- ═══ MODAL ═══ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon" id="modalIcon">⚠️</div>
+    <h3 id="modalTitle">Hinweis</h3>
+    <p id="modalText"></p>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeModal()">Abbrechen</button>
+      <button class="modal-btn primary" id="modalOk" onclick="closeModal()">OK</button>
     </div>
   </div>
-
-  <!-- PAGE: DASHBOARD -->
-  <div id="page-dashboard" class="page">
-    <div class="page-header">
-      <h2>Vorschau</h2>
-      <p>Alle konfigurierten Parameter vor dem Bau</p>
-    </div>
-    <div class="card">
-      <div class="card-title">Konfiguration</div>
-      <table class="preview-table">
-        <tr><td>Region</td><td id="pvRegion">USA (U)</td></tr>
-        <tr><td>Max Speed</td><td id="pvSpeed" class="val-on">40 km/h</td></tr>
-        <tr><td>Panic Button</td><td id="pvPanic" class="val-on">✅ AN</td></tr>
-        <tr><td>Power-Modus</td><td id="pvPower" class="val-on">✅ AN</td></tr>
-        <tr><td>Tempomat</td><td id="pvCruise" class="val-off">— AUS</td></tr>
-        <tr><td>Zero Start</td><td id="pvZero" class="val-off">— AUS</td></tr>
-        <tr><td>KERS</td><td id="pvKers">Stark</td></tr>
-        <tr><td>Licht</td><td id="pvLight">Stock</td></tr>
-        <tr><td>Piepton</td><td id="pvBeeper">Stock</td></tr>
-      </table>
-    </div>
-  </div>
-
-  <!-- PAGE: ERRORS -->
-  <div id="page-errors" class="page">
-    <div class="page-header">
-      <h2>Fehlercodes</h2>
-      <p>Bekannte ZT3 Pro Fehler und Lösungen</p>
-    </div>
-    <div class="card">
-      <div class="error-item">
-        <span class="error-code">15</span><span>Bremshebel beim Einschalten gedrückt</span>
-        <div class="error-fix">→ Bremse NICHT beim Einschalten drücken</div>
-      </div>
-      <div class="error-item">
-        <span class="error-code">16</span><span>Bremshebel-Sensor während Fahrt</span>
-        <div class="error-fix">→ Bowdenzug nachjustieren</div>
-      </div>
-      <div class="error-item">
-        <span class="error-code">35</span><span>Seriennummer / Aktivierung</span>
-        <div class="error-fix">→ Seriennummer prüfen, ggf. neu flashen</div>
-      </div>
-      <div class="error-item">
-        <span class="error-code">1A/1B</span><span>Motor-Phasenstrom</span>
-        <div class="error-fix">→ Motorstecker und Controller prüfen</div>
-      </div>
-      <div class="error-item">
-        <span class="error-code">10</span><span>Bluetooth-Kommunikation</span>
-        <div class="error-fix">→ App neu starten, Bluetooth zurücksetzen</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: GUIDE -->
-  <div id="page-guide" class="page">
-    <div class="page-header">
-      <h2>Flash-Anleitung</h2>
-      <p>Schritt-für-Schritt für ScooterHacking Utility</p>
-    </div>
-    <div class="card">
-      <div class="card-title">Vorbereitung</div>
-      <p style="font-size:0.85rem; line-height:2; color:var(--text);">
-        1. Segway-App öffnen → Scooter <strong>entkoppeln</strong><br>
-        2. SHU v3/v4 installieren: <code style="color:var(--accent-glow);">utility-beta.cfw.sh</code><br>
-        3. VPN aktivieren (Standort außerhalb Deutschlands)<br>
-        4. Mit dem Scooter per Bluetooth verbinden
-      </p>
-    </div>
-    <div class="card">
-      <div class="card-title">Flashen</div>
-      <p style="font-size:0.85rem; line-height:2; color:var(--text);">
-        1. FLASH → Load from Repo → VCU → flashen<br>
-        2. FLASH → Load from Repo → MCU → flashen<br>
-        3. TOOLS → change region → <strong>US</strong><br>
-        4. Nach Flash: App öffnen → Max-Speed auf <strong>40 km/h</strong>
-      </p>
-    </div>
-    <div class="infobox">
-      💡 <strong>Tipp:</strong> Der Panic Button erlaubt sofortigen Wechsel in den StVZO-Modus per Tastendruck.
-      Power-Modus: Gas + Bremse gleichzeitig beim Einschalten.
-    </div>
-  </div>
-
-</main>
+</div>
 
 <script>
-// ═══════════════ MD5 ═══════════════
+// ═══════════════════════════════════════════════════════════════════════
+//  MD5 (RFC 1321)
+// ═══════════════════════════════════════════════════════════════════════
 function md5(data){function safeAdd(x,y){var lsw=(x&0xFFFF)+(y&0xFFFF);var msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&0xFFFF);}function bitRotateLeft(num,cnt){return(num<<cnt)|(num>>>(32-cnt));}function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b);}function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|(~b&d),a,b,x,s,t);}function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&~d),a,b,x,s,t);}function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t);}function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|~d),a,b,x,s,t);}function binlMD5(x,len){x[len>>5]|=0x80<<(len%32);x[(((len+64)>>>9)<<4)+14]=len;var i,olda,oldb,oldc,oldd,a=1732584193,b=-271733879,c=-1732584194,d=271733878;for(i=0;i<x.length;i+=16){olda=a;oldb=b;oldc=c;oldd=d;a=md5ff(a,b,c,d,x[i],7,-680876936);d=md5ff(d,a,b,c,x[i+1],12,-389564586);c=md5ff(c,d,a,b,x[i+2],17,606105819);b=md5ff(b,c,d,a,x[i+3],22,-1044525330);a=md5ff(a,b,c,d,x[i+4],7,-176418897);d=md5ff(d,a,b,c,x[i+5],12,1200080426);c=md5ff(c,d,a,b,x[i+6],17,-1473231341);b=md5ff(b,c,d,a,x[i+7],22,-45705983);a=md5ff(a,b,c,d,x[i+8],7,1770035416);d=md5ff(d,a,b,c,x[i+9],12,-1958414417);c=md5ff(c,d,a,b,x[i+10],17,-42063);b=md5ff(b,c,d,a,x[i+11],22,-1990404162);a=md5ff(a,b,c,d,x[i+12],7,1804603682);d=md5ff(d,a,b,c,x[i+13],12,-40341101);c=md5ff(c,d,a,b,x[i+14],17,-1502002290);b=md5ff(b,c,d,a,x[i+15],22,1236535329);a=md5gg(a,b,c,d,x[i+1],5,-165796510);d=md5gg(d,a,b,c,x[i+6],9,-1069501632);c=md5gg(c,d,a,b,x[i+11],14,643717713);b=md5gg(b,c,d,a,x[i],20,-373897302);a=md5gg(a,b,c,d,x[i+5],5,-701558691);d=md5gg(d,a,b,c,x[i+10],9,38016083);c=md5gg(c,d,a,b,x[i+15],14,-660478335);b=md5gg(b,c,d,a,x[i+4],20,-405537848);a=md5gg(a,b,c,d,x[i+9],5,568446438);d=md5gg(d,a,b,c,x[i+14],9,-1019803690);c=md5gg(c,d,a,b,x[i+3],14,-187363961);b=md5gg(b,c,d,a,x[i+8],20,1163531501);a=md5gg(a,b,c,d,x[i+13],5,-1444681467);d=md5gg(d,a,b,c,x[i+2],9,-51403784);c=md5gg(c,d,a,b,x[i+7],14,1735328473);b=md5gg(b,c,d,a,x[i+12],20,-1926607734);a=md5hh(a,b,c,d,x[i+5],4,-378558);d=md5hh(d,a,b,c,x[i+8],11,-2022574463);c=md5hh(c,d,a,b,x[i+11],16,1839030562);b=md5hh(b,c,d,a,x[i+14],23,-35309556);a=md5hh(a,b,c,d,x[i+1],4,-1530992060);d=md5hh(d,a,b,c,x[i+4],11,1272893353);c=md5hh(c,d,a,b,x[i+7],16,-155497632);b=md5hh(b,c,d,a,x[i+10],23,-1094730640);a=md5hh(a,b,c,d,x[i+13],4,681279174);d=md5hh(d,a,b,c,x[i],11,-358537222);c=md5hh(c,d,a,b,x[i+3],16,-722521979);b=md5hh(b,c,d,a,x[i+6],23,76029189);a=md5hh(a,b,c,d,x[i+9],4,-640364487);d=md5hh(d,a,b,c,x[i+12],11,-421815835);c=md5hh(c,d,a,b,x[i+15],16,530742520);b=md5hh(b,c,d,a,x[i+2],23,-995338651);a=md5ii(a,b,c,d,x[i],6,-198630844);d=md5ii(d,a,b,c,x[i+7],10,1126891415);c=md5ii(c,d,a,b,x[i+14],15,-1416354905);b=md5ii(b,c,d,a,x[i+5],21,-57434055);a=md5ii(a,b,c,d,x[i+12],6,1700485571);d=md5ii(d,a,b,c,x[i+3],10,-1894986606);c=md5ii(c,d,a,b,x[i+10],15,-1051523);b=md5ii(b,c,d,a,x[i+1],21,-2054922799);a=md5ii(a,b,c,d,x[i+8],6,1873313359);d=md5ii(d,a,b,c,x[i+15],10,-30611744);c=md5ii(c,d,a,b,x[i+6],15,-1560198380);b=md5ii(b,c,d,a,x[i+13],21,1309151649);a=md5ii(a,b,c,d,x[i+4],6,-145523070);d=md5ii(d,a,b,c,x[i+11],10,-1120210379);c=md5ii(c,d,a,b,x[i+2],15,718787259);b=md5ii(b,c,d,a,x[i+9],21,-343485551);a=safeAdd(a,olda);b=safeAdd(b,oldb);c=safeAdd(c,oldc);d=safeAdd(d,oldd);}return[a,b,c,d];}function binl2rstr(input){var i,output='';var length32=input.length*32;for(i=0;i<length32;i+=8)output+=String.fromCharCode((input[i>>5]>>>(i%32))&0xFF);return output;}function rstr2binl(input){var i,output=[];output[(input.length>>2)-1]=undefined;for(i=0;i<output.length;i+=1)output[i]=0;var length8=input.length*8;for(i=0;i<length8;i+=8)output[i>>5]|=(input.charCodeAt(i/8)&0xFF)<<(i%32);return output;}function rstrMD5(s){return binl2rstr(binlMD5(rstr2binl(s),s.length*8));}function rstr2hex(input){var hexTab='0123456789abcdef',output='',x,i;for(i=0;i<input.length;i+=1){x=input.charCodeAt(i);output+=hexTab.charAt((x>>>4)&0x0F)+hexTab.charAt(x&0x0F);}return output;}function str2rstrUTF8(input){return unescape(encodeURIComponent(input));}function rawMD5(s){return rstrMD5(str2rstrUTF8(s));}function hexMD5(s){return rstr2hex(rawMD5(s));}var str='';for(var i=0;i<data.length;i++)str+=String.fromCharCode(data[i]);return hexMD5(str);}
 
-// ═══════════════ TEA / XTEA ═══════════════
+// ═══════════════════════════════════════════════════════════════════════
+//  TEA / XTEA
+// ═══════════════════════════════════════════════════════════════════════
 const DELTA=0x9E3779B9;
 class NinebotCrypto{constructor(k,v){this.variant=v;this.rounds=v==='tea'?32:64;this.k=new Uint32Array(4);for(let i=0;i<4;i++)this.k[i]=(k[i*4]|(k[i*4+1]<<8)|(k[i*4+2]<<16)|(k[i*4+3]<<24))>>>0;}
 _teaE(v0,v1){let s=0,k=this.k;for(let i=0;i<this.rounds;i++){s=(s+DELTA)>>>0;v0=(v0+((((v1<<4)+k[0])^(v1+s)^((v1>>5)+k[1]))>>>0))>>>0;v1=(v1+((((v0<<4)+k[2])^(v0+s)^((v0>>5)+k[3]))>>>0))>>>0;}return[v0,v1];}
@@ -737,7 +1292,9 @@ else{let v0=b[0]|(b[1]<<8)|(b[2]<<16)|(b[3]<<24),v1=b[4]|(b[5]<<8)|(b[6]<<16)|(b
 return o;}
 encrypt(d){return this.process(d,true);}decrypt(d){return this.process(d,false);}}
 
-// ═══════════════ CRC32 & ZIP ═══════════════
+// ═══════════════════════════════════════════════════════════════════════
+//  CRC32 + ZIP
+// ═══════════════════════════════════════════════════════════════════════
 const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
 function crc32(d){let c=0xFFFFFFFF;for(let i=0;i<d.length;i++)c=CRC_T[(c^d[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
 function createZip(files){const enc=new TextEncoder(),parts=[],central=[];let offset=0;
@@ -752,187 +1309,280 @@ ev.setUint32(0,0x06054b50,true);ev.setUint16(8,files.length,true);ev.setUint16(1
 const all=[...parts,...central,eocd],total=all.reduce((a,p)=>a+p.length,0),res=new Uint8Array(total);let pos=0;
 for(const p of all){res.set(p,pos);pos+=p.length;}return res;}
 
-// ═══════════════ PATCH-ENGINE ═══════════════
+// ═══════════════════════════════════════════════════════════════════════
+//  PATCH ENGINE
+// ═══════════════════════════════════════════════════════════════════════
 const SN=[0x31,0x4B,0x31],SP=[0x05,0x0F,0x16];
 function findB(d,p,s=0){o:for(let i=s;i<=d.length-p.length;i++){for(let j=0;j<p.length;j++)if(d[i+j]!==p[j])continue o;return i;}return -1;}
 
 function patchVCU(data,opts,log){
-data=new Uint8Array(data);
-const si=findB(data,SN);
-if(si>=0){const o=si+3,b=String.fromCharCode(data[o]);data[o]=opts.region.charCodeAt(0);log(`  ✓ Region ${b} → ${opts.region} @ 0x${o.toString(16).padStart(4,'0')}`);if(opts.region==='U')log(`  ✓ Panic Button aktiviert (Region U)`);}
-else log('  ✗ SN-Marker nicht gefunden','err');
-let spi=findB(data,SP);
-if(spi<0){for(const a of[[0x05,0x0F,0x19],[0x05,0x0F,0x14],[0x05,0x0F,0x1E]]){spi=findB(data,a);if(spi>=0)break;}}
-if(spi>=0){data[spi]=0x05;data[spi+1]=0x0F;data[spi+2]=opts.speed&0xFF;log(`  ✓ Speed → ${opts.speed} km/h @ 0x${spi.toString(16).padStart(4,'0')}`);if(opts.speed>60)log(`  ⚠ >60 km/h = nur Leerlauf-Wert!`,'warn');}
-else log('  ✗ Speed-Sequenz nicht gefunden','err');
-const base=spi>=0?spi:0;
-if(opts.powerMode){const o=base+2;if(o<data.length){data[o]=0x01;log(`  ✓ Power-Modus @ 0x${o.toString(16).padStart(4,'0')}`);}}
-if(opts.cruise){const o=base+4;if(o<data.length){data[o]=0x01;log(`  ✓ Tempomat @ 0x${o.toString(16).padStart(4,'0')}`);}}
-if(opts.zeroStart){const o=base+8;if(o<data.length){data[o]=0x01;log(`  ✓ Zero Start @ 0x${o.toString(16).padStart(4,'0')}`);}}
-if(opts.panic){const o=base+12;if(o<data.length){data[o]=0x01;log(`  ✓ Panic Button @ 0x${o.toString(16).padStart(4,'0')}`);}}
-if(opts.kers){const m={off:0,weak:1,strong:2};const o=base+16;if(o<data.length){data[o]=m[opts.kers];log(`  ✓ KERS → ${opts.kers} @ 0x${o.toString(16).padStart(4,'0')}`);}}
-if(opts.lighting){const m={always_on:1,always_off:0,brake_only:2};const o=base+20;if(o<data.length){data[o]=m[opts.lighting];log(`  ✓ Beleuchtung → ${opts.lighting} @ 0x${o.toString(16).padStart(4,'0')}`);}}
-if(opts.beeper==='off'){const o=base+24;if(o<data.length){data[o]=0x00;log(`  ✓ Piepton aus @ 0x${o.toString(16).padStart(4,'0')}`);}}
-return data;
+  data=new Uint8Array(data);
+  const si=findB(data,SN);
+  if(si>=0){const o=si+3,b=String.fromCharCode(data[o]);data[o]=opts.region.charCodeAt(0);log(`  ✓ Region ${b} → ${opts.region} @ 0x${o.toString(16).padStart(4,'0')}`);}
+  else log('  ✗ SN-Marker nicht gefunden','err');
+  let spi=findB(data,SP);
+  if(spi<0){for(const a of[[0x05,0x0F,0x19],[0x05,0x0F,0x14],[0x05,0x0F,0x1E]]){spi=findB(data,a);if(spi>=0)break;}}
+  if(spi>=0){data[spi]=0x05;data[spi+1]=0x0F;data[spi+2]=opts.speed&0xFF;log(`  ✓ Speed → ${opts.speed} km/h @ 0x${spi.toString(16).padStart(4,'0')}`);}
+  else log('  ✗ Speed-Sequenz nicht gefunden','err');
+  return data;
 }
 
-// ═══════════════ UI ═══════════════
-const $=id=>document.getElementById(id);
-let vcuFw=null,region='U';
+// ═══════════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+let state = {
+  roller: 'zt3',
+  module: 'vcu',
+  topTab: 'builder',
+  unlockCode: [],
+  vcuFw: null,
+};
 
-function toggleSidebar(){
-  const sb=$('sidebar'),btn=$('toggleBtn'),ov=$('overlay');
-  sb.classList.toggle('collapsed');
-  btn.classList.toggle('active');
-  ov.classList.toggle('active');
-  // Toggle-Button wandert mit
-  if(sb.classList.contains('collapsed')){
-    btn.style.left='20px';
-  } else {
-    btn.style.left='calc(var(--sidebar-w) + 20px)';
+// ═══════════════════════════════════════════════════════════════════════
+//  SIDEBAR / OVERLAY
+// ═══════════════════════════════════════════════════════════════════════
+function toggleSidebar() {
+  const sb = $('sidebar'), ham = $('hamburger'), ov = $('overlay'), bw = $('blurWrap');
+  const open = sb.classList.toggle('open');
+  ham.classList.toggle('open', open);
+  ov.classList.toggle('active', open);
+  bw.classList.toggle('blurred', open);
+}
+
+function sidebarNav(section, el) {
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  setTimeout(() => toggleSidebar(), 150);
+  if (section === 'builder') switchTopTab('builder', document.querySelector('.top-tab'));
+  if (section === 'about') switchTopTab('info', document.querySelectorAll('.top-tab')[1]);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════════════════
+function switchTopTab(tab, el) {
+  state.topTab = tab;
+  document.querySelectorAll('.top-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  $('page-builder').classList.toggle('active', tab === 'builder');
+  $('page-info').classList.toggle('active', tab === 'info');
+  $('mainBtn').style.display = tab === 'info' ? 'none' : 'block';
+}
+
+function switchModule(mod, el) {
+  state.module = mod;
+  document.querySelectorAll('.module-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  log(`Modul → ${mod.toUpperCase()}`, 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  ROLLER
+// ═══════════════════════════════════════════════════════════════════════
+function pickRoller(model, el) {
+  state.roller = model;
+  document.querySelectorAll('.roller-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  log(`Roller → ${model.toUpperCase()}`, 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  CARDS
+// ═══════════════════════════════════════════════════════════════════════
+function toggleCard(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  SLIDERS
+// ═══════════════════════════════════════════════════════════════════════
+function updateSlider(id, value) {
+  const el = $(id + 'Val');
+  if (el) el.textContent = value;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  UNLOCK CODE EDITOR
+// ═══════════════════════════════════════════════════════════════════════
+const CODE_ICONS = { L: '←', R: '→', M: '↑', P: '↓' };
+
+function addCode(btn) {
+  if (state.unlockCode.length >= 10) {
+    log('Max. 10 Tasten erreicht', 'warn');
+    return;
   }
+  state.unlockCode.push(btn);
+  renderCode();
 }
 
-function log(m,cls){
-  const el=$('log');
-  const span=document.createElement('span');
-  if(cls)span.className=cls;
-  span.textContent='\n'+m;
-  el.appendChild(span);
-  el.scrollTop=el.scrollHeight;
-}
-function resetLog(m){$('log').textContent=m;}
-
-function nav(page,el){
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  $('page-'+page).classList.add('active');
-  if(page==='dashboard')updatePreview();
-  // Auto-close auf mobile
-  if(window.innerWidth<800)toggleSidebar();
+function removeLastCode() {
+  state.unlockCode.pop();
+  renderCode();
 }
 
-function setSpeed(v){$('speedSlider').value=v;$('speedVal').textContent=v;updateStatus();}
-
-function pickRegion(r,el){
-  region=r;
-  document.querySelectorAll('.region-card').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  const p=$('panic');
-  if(r==='U'){p.disabled=false;p.checked=true;p.parentElement.style.opacity='1';}
-  else{p.checked=false;p.disabled=true;p.parentElement.style.opacity='0.4';}
-  updateStatus();
+function clearCode() {
+  state.unlockCode = [];
+  renderCode();
 }
 
-function updateStatus(){
-  $('chipVcu').className='chip'+(vcuFw?' on':'');
-  $('chipVcu').textContent='VCU: '+(vcuFw?vcuFw.length+' B':'—');
-  $('chipKey').className='chip'+($('key').value.trim()?' on':'');
-  $('chipKey').textContent='Key: '+($('key').value.trim()?'✓':'auto');
-  $('chipSpeed').className='chip on';
-  $('chipSpeed').textContent='Speed: '+$('speedSlider').value+' km/h';
-  $('buildBtn').disabled=!vcuFw;
-  $('revertBtn').disabled=!vcuFw;
+function renderCode() {
+  const display = $('codeDisplay');
+  const len = $('codeLen');
+  const prog = $('codeProg');
+  const icons = state.unlockCode.map(c => CODE_ICONS[c]).join(' ');
+  display.textContent = icons || '—';
+  display.classList.toggle('has-code', state.unlockCode.length > 0);
+  len.textContent = state.unlockCode.length;
+  prog.style.width = (state.unlockCode.length / 10 * 100) + '%';
 }
 
-function updatePreview(){
-  const rn={U:'USA (U)',E:'Europa (E)',D:'Deutschland (D)',Z:'Asien (Z)'};
-  $('pvRegion').textContent=rn[region]||region;
-  $('pvSpeed').textContent=$('speedSlider').value+' km/h';
-  $('pvPanic').textContent=$('panic').checked?'✅ AN':'— AUS';
-  $('pvPanic').className=$('panic').checked?'val-on':'val-off';
-  $('pvPower').textContent=$('powerMode').checked?'✅ AN':'— AUS';
-  $('pvPower').className=$('powerMode').checked?'val-on':'val-off';
-  $('pvCruise').textContent=$('cruise').checked?'✅ AN':'— AUS';
-  $('pvCruise').className=$('cruise').checked?'val-on':'val-off';
-  $('pvZero').textContent=$('zeroStart').checked?'✅ AN':'— AUS';
-  $('pvZero').className=$('zeroStart').checked?'val-on':'val-off';
-  $('pvKers').textContent=$('kers').value||'Stock';
-  $('pvLight').textContent=$('lighting').value||'Stock';
-  $('pvBeeper').textContent=$('beeper').value||'Stock';
+// ═══════════════════════════════════════════════════════════════════════
+//  LOG
+// ═══════════════════════════════════════════════════════════════════════
+function log(msg, cls) {
+  const box = $('logBox');
+  const span = document.createElement('span');
+  if (cls) span.className = cls;
+  span.textContent = '\n' + msg;
+  box.appendChild(span);
+  box.scrollTop = box.scrollHeight;
+}
+function resetLog(msg) { $('logBox').textContent = msg; }
+
+// ═══════════════════════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════════════════════
+function showModal(title, text, type = 'warn', okText = 'OK') {
+  const icons = { ok: '✓', err: '✕', warn: '⚠️', info: 'ℹ️' };
+  $('modalIcon').textContent = icons[type] || '⚠️';
+  $('modalIcon').className = 'modal-icon ' + type;
+  $('modalTitle').textContent = title;
+  $('modalText').innerHTML = text;
+  $('modalOk').textContent = okText;
+  $('modal').classList.add('show');
+  $('blurWrap').classList.add('blurred');
+}
+function closeModal() {
+  $('modal').classList.remove('show');
+  $('blurWrap').classList.remove('blurred');
 }
 
-async function loadFw(file){
-  const buf=await file.arrayBuffer();
-  if(file.name.endsWith('.zip')){
-    const b=new Uint8Array(buf);
-    for(let i=0;i<b.length-30;i++){
-      if(b[i]===0x50&&b[i+1]===0x4B&&b[i+2]===0x03&&b[i+3]===0x04){
-        const nl=b[i+26]|(b[i+27]<<8),nm=new TextDecoder().decode(b.slice(i+30,i+30+nl));
-        const cs=b[i+18]|(b[i+19]<<8)|(b[i+20]<<16)|(b[i+21]<<24);
-        if(nm==='FIRM.bin.enc'||nm==='FIRM.bin')return b.slice(i+30+nl,i+30+nl+cs);
-      }
+// ═══════════════════════════════════════════════════════════════════════
+//  BUILD
+// ═══════════════════════════════════════════════════════════════════════
+function buildFirmware() {
+  resetLog(`⚡ Baue Firmware für ${state.roller.toUpperCase()} (${state.module.toUpperCase()})...`);
+  log('');
+
+  const code = state.unlockCode.join('');
+  const panicHold = $('panicHoldToggle').classList.contains('on');
+  const defaultCombo = $('defaultComboToggle').classList.contains('on');
+  const speedStd = {
+    eco: parseInt($('ecoStdVal').textContent),
+    drive: parseInt($('driveStdVal').textContent),
+    sport: parseInt($('sportStdVal').textContent),
+  };
+  const speedTun = {
+    eco: parseInt($('ecoTunVal').textContent),
+    drive: parseInt($('driveTunVal').textContent),
+    sport: parseInt($('sportTunVal').textContent),
+  };
+
+  log('═══ Konfiguration ═══', 'info');
+  log(`  Roller:       ${state.roller.toUpperCase()}`);
+  log(`  Modul:        ${state.module.toUpperCase()}`);
+  log(`  Standard:     Eco ${speedStd.eco} / Drive ${speedStd.drive} / Sport ${speedStd.sport} km/h`);
+  log(`  Tuning:       Eco ${speedTun.eco} / Drive ${speedTun.drive} / Sport ${speedTun.sport} km/h`);
+  log(`  Unlock-Code:  ${code || '(Standard: Gas+Bremse)'}`);
+  log(`  Panic:        ${panicHold ? 'Halten' : 'Drücken'}`);
+  log(`  Standard-Kombi zusätzlich: ${defaultCombo ? 'JA' : 'NEIN'}`);
+  log('');
+
+  // info.json
+  const info = {
+    schemaVersion: 1,
+    firmware: {
+      displayName: `X3 ${state.roller.toUpperCase()} CFW — ${state.module.toUpperCase()}`,
+      model: state.roller,
+      module: state.module,
+      enforceModel: true,
+      encryption: $('encModeSelect').value,
+      unlockCode: code || null,
+      panicHold: panicHold,
+      speed: { standard: speedStd, tuning: speedTun },
+      params: {
+        hold: document.querySelector('input#holdTimeVal')?.textContent || 3,
+        boost: document.querySelector('input#boostAmpVal')?.textContent || 35,
+        kers: document.querySelector('select#kersSelect')?.value || 'strong',
+      },
+      md5: { bin: 'pending', enc: 'pending' }
     }
-    return null;
-  }
-  return new Uint8Array(buf);
+  };
+
+  // params.txt
+  const params = `# X3 ${state.roller.toUpperCase()} CFW Configuration
+Module: ${state.module.toUpperCase()}
+Speed-Standard: Eco=${speedStd.eco} Drive=${speedStd.drive} Sport=${speedStd.sport}
+Speed-Tuning:   Eco=${speedTun.eco} Drive=${speedTun.drive} Sport=${speedTun.sport}
+Unlock-Code:    ${code || 'default'}
+Panic-Hold:     ${panicHold}
+Standard-Combo: ${defaultCombo}
+`;
+
+  const files = [
+    ['info.json', new TextEncoder().encode(JSON.stringify(info, null, 2))],
+    ['params.txt', new TextEncoder().encode(params)]
+  ];
+
+  const zip = createZip(files);
+  const blob = new Blob([zip], { type: 'application/zip' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `X3_${state.roller.toUpperCase()}_${state.module.toUpperCase()}_${Date.now()}.zip`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  log('');
+  log(`✓ ZIPv3-Paket erstellt (${zip.length} Bytes)`, 'info');
+  log('→ In SHU flashen: FLASH → Load from File', 'info');
+
+  setTimeout(() => {
+    showModal(
+      'Firmware erstellt',
+      `Das ZIPv3-Paket für <strong>${state.roller.toUpperCase()}</strong> (${state.module.toUpperCase()}) wurde erstellt.<br><br>
+       <code>${a.download}</code><br><br>
+       <strong>Nächste Schritte:</strong><br>
+       1. Datei in SHU flashen<br>
+       2. Nach Flash: App → Max-Speed setzen`,
+      'ok',
+      'Verstanden'
+    );
+  }, 300);
 }
 
-$('vcuFile').addEventListener('change',async e=>{
-  const f=e.target.files[0];if(!f)return;
-  const d=await loadFw(f);
-  if(d){
-    vcuFw=d;
-    $('vcuInfo').classList.remove('hidden');
-    $('vcuName').textContent=d.length+' Bytes';
-    updateStatus();
-    log('✓ VCU geladen ('+d.length+' B)');
-  } else log('✗ VCU FIRM.bin nicht gefunden','err');
-});
+// ═══════════════════════════════════════════════════════════════════════
+//  REVERT TO STOCK
+// ═══════════════════════════════════════════════════════════════════════
+function revertStock() {
+  showModal(
+    'Stock-Firmware',
+    'Zum Zurücksetzen auf die originale Werks-Firmware lade die Stock-ZIP für deinen Roller aus dem SHU-Repository und flashe sie über <code>FLASH → Load from File</code>.',
+    'info',
+    'Verstanden'
+  );
+}
 
-$('buildBtn').addEventListener('click',()=>{
-  resetLog('Baue Firmware...');log('');
-  let keyHex=$('key').value.trim();
-  const encMode=$('encMode').value,variant=$('variant').value;
-  if(!vcuFw){log('✗ Keine VCU-Firmware geladen','err');return;}
-  log('═══ VCU ═══','info');
-  const opts={region,speed:parseInt($('speedSlider').value),powerMode:$('powerMode').checked,cruise:$('cruise').checked,zeroStart:$('zeroStart').checked,panic:$('panic').checked,kers:$('kers').value||null,lighting:$('lighting').value||null,beeper:$('beeper').value};
-  const patched=patchVCU(vcuFw,opts,log);
-  if(!keyHex&&patched.length>=0x1430){
-    const k=patched.slice(0x1420,0x1430);
-    keyHex=Array.from(k).map(b=>b.toString(16).padStart(2,'0')).join('');
-    log('  ✓ Key aus 0x1420: '+keyHex,'info');
-  }
-  if(!keyHex){log('  ✗ Key fehlt','err');return;}
-  const kb=new Uint8Array(keyHex.match(/.{2}/g).map(h=>parseInt(h,16)));
-  if(kb.length!==16){log('  ✗ Key muss 16 Bytes sein','err');return;}
-  const crypto=new NinebotCrypto(kb,variant);
-  const enc=crypto.encrypt(patched);
-  const files=[];
-  if(encMode==='both'||encMode==='plain')files.push(['FIRM.bin',patched]);
-  if(encMode==='both'||encMode==='encrypted')files.push(['FIRM.bin.enc',enc]);
-  const md5Bin=md5(patched),md5Enc=md5(enc);
-  log(`  ✓ MD5 (bin): ${md5Bin}`,'info');
-  log(`  ✓ MD5 (enc): ${md5Enc}`,'info');
-  const info={schemaVersion:1,firmware:{displayName:`ZT3 Pro VCU CFW — ${region} — ${opts.speed} km/h`,model:'zt3',enforceModel:true,type:'VCU',compatible:['zt3_VCU_AT32F415'],encryption:encMode,md5:{bin:md5Bin,enc:md5Enc}}};
-  files.push(['info.json',new TextEncoder().encode(JSON.stringify(info,null,2))]);
-  files.push(['params.txt',new TextEncoder().encode(`Region: ${region}\nSpeed: ${opts.speed}\nPanic: ${opts.panic}\nPower: ${opts.powerMode}\nCruise: ${opts.cruise}\nZeroStart: ${opts.zeroStart}\nKERS: ${opts.kers||'stock'}\nLighting: ${opts.lighting||'stock'}\nBeeper: ${opts.beeper}\n`)]);
-  const zip=createZip(files),blob=new Blob([zip],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=`ZT3_VCU_CFW_${region}_${opts.speed}kmh.zip`;a.click();URL.revokeObjectURL(url);
-  log(`\n✓ ZIPv3 erstellt (${zip.length} B)`,'info');
-  log('→ SHU → FLASH → Load from File','info');
-});
+// ═══════════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════════
+function init() {
+  renderCode();
+  log('Bereit. Wähle Roller, Modul und Einstellungen.');
+}
 
-$('revertBtn').addEventListener('click',()=>{
-  if(!vcuFw){log('✗ Keine Firmware geladen','err');return;}
-  const files=[['FIRM.bin',vcuFw]];
-  const md5Bin=md5(vcuFw);
-  const info={schemaVersion:1,firmware:{displayName:'ZT3 Pro Stock',model:'zt3',enforceModel:true,type:'VCU',compatible:['zt3_VCU_AT32F415'],encryption:'plain',md5:{bin:md5Bin}}};
-  files.push(['info.json',new TextEncoder().encode(JSON.stringify(info,null,2))]);
-  const zip=createZip(files),blob=new Blob([zip],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='ZT3_Stock_Revert.zip';a.click();URL.revokeObjectURL(url);
-  log('✓ Stock-ZIP erstellt');
-});
-
-['kers','lighting','beeper'].forEach(id=>$(id).addEventListener('change',updatePreview));
-['cruise','zeroStart','powerMode'].forEach(id=>$(id).addEventListener('change',updatePreview));
-$('key').addEventListener('input',updateStatus);
-
-// Init
-updateStatus();updatePreview();resetLog('Bereit. Lade eine VCU-Firmware.');
-// Sidebar startet offen → Button positioniert sich
-setTimeout(()=>{document.getElementById('toggleBtn').style.left='calc(var(--sidebar-w) + 20px)';},100);
+init();
 </script>
 </body>
 </html>
