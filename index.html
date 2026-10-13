@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZT3 Pro CFW Builder — Ultimate v7</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --panel: #111; --card: #161616; --border: #232323;
+    --accent: #4ade80; --accent-dim: #166534; --warn: #fbbf24;
+    --danger: #ef4444; --text: #e5e5e5; --muted: #666; --dim: #333;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { width: 240px; background: var(--panel); border-right: 1px solid var(--border);
+             padding: 20px 0; display: flex; flex-direction: column; position: fixed;
+             height: 100vh; overflow-y: auto; }
+  .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .logo h1 { font-size: 1.1rem; color: #fff; letter-spacing: -0.5px; }
+  .logo p { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .nav-item { padding: 11px 20px; cursor: pointer; font-size: 0.85rem; color: var(--muted);
+              border-left: 3px solid transparent; transition: all 0.15s; display: flex;
+              align-items: center; gap: 10px; }
+  .nav-item:hover { background: #1a1a1a; color: #aaa; }
+  .nav-item.active { background: #1a2a1a; color: var(--accent); border-left-color: var(--accent); }
+  .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-item .badge-dot { margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main { margin-left: 240px; flex: 1; padding: 28px 32px; max-width: 1100px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  h2 { font-size: 1.25rem; color: #fff; margin-bottom: 4px; }
+  .page-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+          padding: 18px; margin-bottom: 16px; }
+  .card-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+                letter-spacing: 1.2px; margin-bottom: 14px; }
+
+  label { display: flex; align-items: center; justify-content: space-between;
+          padding: 8px 0; font-size: 0.88rem; }
+  label .lbl { color: #bbb; }
+  label .hint { font-size: 0.7rem; color: var(--muted); margin-left: 6px; }
+
+  select, input[type="number"], input[type="text"] {
+    background: #1a1a1a; border: 1px solid var(--dim); color: var(--text);
+    padding: 7px 10px; border-radius: 6px; font-size: 0.85rem; }
+  input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; }
+  input[type="file"] { background: #1a1a1a; border: 1px dashed var(--dim); padding: 16px;
+    border-radius: 8px; width: 100%; color: var(--muted); cursor: pointer; font-size: 0.85rem; }
+  input[type="file"]:hover { border-color: var(--accent); }
+
+  button { background: var(--accent); color: #000; border: none; padding: 14px 24px;
+    border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    width: 100%; letter-spacing: 0.3px; transition: background 0.15s; }
+  button:hover { background: #22c55e; }
+  button:disabled { background: var(--dim); color: #555; cursor: not-allowed; }
+  .btn-sec { background: #222; color: #ccc; margin-top: 8px; }
+  .btn-sec:hover { background: #333; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* Region-Karten */
+  .region-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .region-card { padding: 14px; border-radius: 10px; background: #1a1a1a;
+    border: 1px solid var(--dim); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .region-card:hover { border-color: #444; }
+  .region-card.active { background: #0a2a0a; border-color: var(--accent); }
+  .region-card .flag { font-size: 1.4rem; margin-bottom: 4px; }
+  .region-card .name { font-size: 0.85rem; font-weight: 600; color: #ddd; }
+  .region-card .speed { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .region-card.active .name { color: var(--accent); }
+  .region-card.active .speed { color: #4ade80aa; }
+
+  /* Speed-Slider */
+  .slider-wrap { padding: 8px 0; }
+  .slider-wrap input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .slider-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .speed-display { font-size: 2rem; font-weight: 800; color: var(--accent); text-align: center; }
+  .speed-unit { font-size: 0.9rem; color: var(--muted); }
+
+  /* Dashboard-Vorschau */
+  .dash-preview { background: #0d0d0d; border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-top: 12px; }
+  .dash-preview h4 { font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 10px; }
+  .dash-row { display: flex; justify-content: space-between; font-size: 0.78rem;
+    padding: 5px 0; border-bottom: 1px solid #1a1a1a; }
+  .dash-row:last-child { border-bottom: none; }
+  .dash-row .k { color: var(--muted); }
+  .dash-row .v { color: var(--text); font-family: 'SF Mono', monospace; }
+  .dash-row .v.on { color: var(--accent); }
+  .dash-row .v.off { color: #555; }
+  .dash-row .v.warn { color: var(--warn); }
+
+  /* Log */
+  .log-box { background: #080808; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; font-family: 'SF Mono', monospace; font-size: 0.75rem;
+    max-height: 300px; overflow-y: auto; white-space: pre-wrap;
+    color: var(--accent); line-height: 1.6; }
+  .log-box .err { color: var(--danger); }
+  .log-box .warn { color: var(--warn); }
+  .log-box .info { color: #60a5fa; }
+
+  /* Fehlercode-Datenbank */
+  .error-db { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; max-height: 400px; overflow-y: auto; }
+  .error-item { padding: 8px 0; border-bottom: 1px solid #1a1a1a; font-size: 0.8rem; }
+  .error-item:last-child { border-bottom: none; }
+  .error-code { display: inline-block; background: #2a0a0a; color: var(--danger);
+    padding: 1px 8px; border-radius: 4px; font-family: monospace; font-weight: 600;
+    font-size: 0.75rem; margin-right: 8px; }
+  .error-desc { color: #ccc; }
+  .error-fix { color: var(--muted); font-size: 0.72rem; margin-top: 2px; margin-left: 34px; }
+
+  /* Warnbox */
+  .warnbox { background: #1a0e00; border: 1px solid #553300; border-radius: 8px;
+    padding: 12px 14px; font-size: 0.78rem; color: var(--warn); margin-top: 14px; line-height: 1.6; }
+  .infobox { background: #0a1a2a; border: 1px solid #1e3a5f; border-radius: 8px;
+    padding: 12px 14px; font-size: 0.78rem; color: #93c5fd; margin-top: 14px; line-height: 1.6; }
+
+  /* Status-Bar */
+  .status-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px;
+    background: #1a1a1a; color: var(--muted); border: 1px solid var(--dim); }
+  .chip.on { background: #0a2a0a; color: var(--accent); border-color: var(--accent-dim); }
+  .chip.warn { background: #2a1a00; color: var(--warn); border-color: #553300; }
+
+  /* Tabs */
+  .tab-row { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab-btn { flex: 1; padding: 10px; background: #1a1a1a; border: 1px solid var(--dim);
+    border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.82rem;
+    color: var(--muted); font-weight: 600; transition: all 0.15s; }
+  .tab-btn.active { background: #0a2a0a; border-color: var(--accent); color: var(--accent); }
+
+  .hidden { display: none !important; }
+  .step-num { display: inline-block; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent-dim); color: var(--accent); font-size: 0.65rem;
+    text-align: center; line-height: 20px; font-weight: 700; margin-right: 8px; }
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; } .sidebar .logo h1, .sidebar .logo p, .nav-item span:not(.icon) { display: none; }
+    .nav-item { justify-content: center; padding: 12px 0; } .main { margin-left: 60px; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav class="sidebar">
+  <div class="logo">
+    <h1>⚡ ZT3 Builder</h1>
+    <p>Ultimate v7.0</p>
+  </div>
+  <div class="nav-item active" onclick="nav('build', this)">
+    <span class="icon">🔧</span><span>Firmware bauen</span>
+  </div>
+  <div class="nav-item" onclick="nav('dashboard', this)">
+    <span class="icon">📊</span><span>Dashboard-Vorschau</span>
+  </div>
+  <div class="nav-item" onclick="nav('errors', this)">
+    <span class="icon">⚠️</span><span>Fehlercodes</span>
+  </div>
+  <div class="nav-item" onclick="nav('guide', this)">
+    <span class="icon">📖</span><span>Flash-Anleitung</span>
+  </div>
+</nav>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main">
+
+  <!-- ═══ PAGE: BUILD ═══ -->
+  <div id="page-build" class="page active">
+    <h2>Firmware bauen</h2>
+    <p class="page-desc">VCU/MCU Custom Firmware für ZT3 Pro · ZIPv3-konform · Panic-Button &amp; alle Regionen</p>
+
+    <div class="status-bar" id="statusBar">
+      <span class="chip" id="chipVcu">VCU: —</span>
+      <span class="chip" id="chipMcu">MCU: —</span>
+      <span class="chip" id="chipKey">Key: —</span>
+      <span class="chip" id="chipSpeed">Speed: —</span>
+    </div>
+
+    <!-- Schritt 1: Firmware -->
+    <div class="card">
+      <div class="card-title"><span class="step-num">1</span> Firmware-Quelle</div>
+      <div class="tab-row">
+        <div class="tab-btn active" id="tabVcu" onclick="switchMod('vcu')">🔧 VCU</div>
+        <div class="tab-btn" id="tabMcu" onclick="switchMod('mcu')">⚙️ MCU</div>
+      </div>
+      <div id="modVcu">
+        <input type="file" id="vcuFile" accept=".bin,.zip">
+        <div id="vcuInfo" class="hidden" style="margin-top:10px;">
+          <span class="chip on" id="vcuBadge">geladen</span>
+          <span id="vcuName" style="margin-left:8px; color:#888; font-size:0.8rem;"></span>
+        </div>
+      </div>
+      <div id="modMcu" class="hidden">
+        <input type="file" id="mcuFile" accept=".bin,.zip">
+        <div id="mcuInfo" class="hidden" style="margin-top:10px;">
+          <span class="chip on" id="mcuBadge">geladen</span>
+          <span id="mcuName" style="margin-left:8px; color:#888; font-size:0.8rem;"></span>
+        </div>
+        <p style="font-size:0.72rem; color:var(--muted); margin-top:8px;">
+          ⚠️ MCU muss per ST-Link mit demselben Key gepatcht werden wie die VCU (Offset <code>0x1420</code>).
+        </p>
+      </div>
+    </div>
+
+    <!-- Schritt 2: Region -->
+    <div class="card">
+      <div class="card-title"><span class="step-num">2</span> Region &amp; Geschwindigkeit</div>
+      <div class="region-grid" style="margin-bottom:16px;">
+        <div class="region-card active" data-region="U" onclick="pickRegion('U', this)">
+          <div class="flag">🇺🇸</div><div class="name">USA</div><div class="speed">40 km/h · Panic-Button</div>
+        </div>
+        <div class="region-card" data-region="E" onclick="pickRegion('E', this)">
+          <div class="flag">🇪🇺</div><div class="name">Europa</div><div class="speed">25 km/h</div>
+        </div>
+        <div class="region-card" data-region="D" onclick="pickRegion('D', this)">
+          <div class="flag">🇩🇪</div><div class="name">Deutschland</div><div class="speed">20 km/h · StVZO</div>
+        </div>
+        <div class="region-card" data-region="Z" onclick="pickRegion('Z', this)">
+          <div class="flag">🌏</div><div class="name">Asien</div><div class="speed">32 km/h</div>
+        </div>
+      </div>
+
+      <div class="slider-wrap">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+          <span style="font-size:0.8rem; color:var(--muted);">Max. Geschwindigkeit</span>
+          <span><span class="speed-display" id="speedVal">40</span><span class="speed-unit"> km/h</span></span>
+        </div>
+        <input type="range" id="speedSlider" min="5" max="127" value="40" step="1" oninput="setSpeed(this.value)">
+        <div class="slider-labels">
+          <span>5</span><span>25 (EU)</span><span>40 (US real)</span><span>60 (no-load)</span><span class="theoretical">127 (theo.)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schritt 3: Features -->
+    <div class="card">
+      <div class="card-title"><span class="step-num">3</span> Feature-Patches</div>
+      <div class="grid2">
+        <div>
+          <label><span class="lbl">🚨 Panic Button</span><input type="checkbox" id="panic" checked disabled></label>
+          <label><span class="lbl">⚡ Power-Modus <span class="hint">(Gas+Bremse)</span></span><input type="checkbox" id="powerMode" checked></label>
+          <label><span class="lbl">🔄 Tempomat</span><input type="checkbox" id="cruise"></label>
+          <label><span class="lbl">🚀 Zero Start</span><input type="checkbox" id="zeroStart"></label>
+        </div>
+        <div>
+          <label><span class="lbl">🔋 KERS</span>
+            <select id="kers"><option value="">— Stock —</option><option value="off">Aus</option><option value="weak">Schwach</option><option value="strong" selected>Stark</option></select>
+          </label>
+          <label><span class="lbl">💡 Beleuchtung</span>
+            <select id="lighting"><option value="">— Stock —</option><option value="always_on">Immer an</option><option value="always_off">Immer aus</option><option value="brake_only">Nur Bremsen</option></select>
+          </label>
+          <label><span class="lbl">📊 Dashboard-Typ</span>
+            <select id="dashType"><option value="stock">Stock</option><option value="china">China-Dashboard</option><option value="us">US-Dashboard</option></select>
+          </label>
+          <label><span class="lbl">🔔 Piepton >25 km/h</span>
+            <select id="beeper"><option value="stock">— Stock —</option><option value="off">Aus</option><option value="soft">Leise</option></select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schritt 4: MCU (nur wenn MCU geladen) -->
+    <div class="card hidden" id="mcuCard">
+      <div class="card-title"><span class="step-num">4</span> MCU-Parameter</div>
+      <div class="grid2">
+        <label><span class="lbl">Motorstrom-Limit (A)</span>
+          <input type="number" id="mcuCurrent" value="25" min="10" max="60" style="width:80px"></label>
+        <label><span class="lbl">PWM-Frequenz (kHz)</span>
+          <input type="number" id="mcuPwm" value="16" min="8" max="32" style="width:80px"></label>
+        <label><span class="lbl">Beschleunigungs-Kurve</span>
+          <select id="mcuAccel"><option value="">— Stock —</option><option value="linear">Linear</option><option value="aggressive">Aggressiv</option><option value="smooth">Sanft</option></select></label>
+        <label><span class="lbl">Rekuperations-Bremse</span>
+          <select id="mcuRegen"><option value="">— Stock —</option><option value="off">Aus</option><option value="weak">Schwach</option><option value="strong">Stark</option></select></label>
+      </div>
+    </div>
+
+    <!-- Schritt 5: Crypto -->
+    <div class="card">
+      <div class="card-title"><span class="step-num">5</span> Verschlüsselung &amp; Key</div>
+      <label><span class="lbl">Unlock-Key (Hex, 16 Bytes)</span>
+        <input type="text" id="key" placeholder="auto aus 0x1420" style="width:260px; font-family:monospace; font-size:0.75rem;"></label>
+      <label><span class="lbl">Verschlüsselung</span>
+        <select id="variant"><option value="xtea">XTEA (neu)</option><option value="tea">TEA (alt)</option></select></label>
+      <label><span class="lbl">ZIPv3-Modus</span>
+        <select id="encMode"><option value="both">both (plain + encrypted)</option><option value="encrypted">encrypted</option><option value="plain">plain</option></select></label>
+    </div>
+
+    <button id="buildBtn" disabled>🔧 Firmware bauen &amp; ZIPv3-ZIPs erstellen</button>
+    <button class="btn-sec" id="revertBtn" disabled>↩ Revert to Stock (Original-ZIP)</button>
+
+    <div class="log-box" id="log" style="margin-top:16px;">Bereit. Lade VCU- und/oder MCU-Firmware.</div>
+
+    <div class="warnbox">
+      ⚠️ <strong>Flash-Reihenfolge:</strong> Erst VCU, dann MCU. Beide benötigen denselben Key.
+      VCU ≤ 1.4.10. Vor Flash entkoppeln! Nach Flash: App → Max-Speed auf 40 km/h stellen.
+    </div>
+    <div class="infobox">
+      💡 <strong>Tipp:</strong> Der <strong>Panic Button</strong> erlaubt sofortigen Wechsel in den StVZO-Modus per Tastendruck.
+      Power-Modus: Gas + Bremse gleichzeitig beim Einschalten → 40 km/h freigeschaltet.
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: DASHBOARD ═══ -->
+  <div id="page-dashboard" class="page">
+    <h2>Dashboard-Vorschau</h2>
+    <p class="page-desc">Live-Vorschau aller konfigurierten Parameter vor dem Bau</p>
+    <div class="card">
+      <div class="card-title">Konfiguration</div>
+      <table style="width:100%; font-size:0.82rem; border-collapse:collapse;">
+        <tr><td style="padding:6px 0; color:var(--muted);">Region</td><td id="pvRegion" style="font-family:monospace;">USA (U)</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">Max Speed</td><td id="pvSpeed" style="font-family:monospace; color:var(--accent);">40 km/h</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">Panic Button</td><td id="pvPanic" style="font-family:monospace;">✅ AN</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">Power-Modus</td><td id="pvPower" style="font-family:monospace;">✅ AN</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">Tempomat</td><td id="pvCruise" style="font-family:monospace;">— AUS</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">Zero Start</td><td id="pvZero" style="font-family:monospace;">— AUS</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">KERS</td><td id="pvKers" style="font-family:monospace;">stark</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">Beleuchtung</td><td id="pvLight" style="font-family:monospace;">Stock</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">Dashboard-Typ</td><td id="pvDash" style="font-family:monospace;">Stock</td></tr>
+        <tr><td style="padding:6px 0; color:var(--muted);">Piepton >25</td><td id="pvBeeper" style="font-family:monospace;">Stock</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: ERRORS ═══ -->
+  <div id="page-errors" class="page">
+    <h2>Fehlercode-Datenbank</h2>
+    <p class="page-desc">Bekannte ZT3 Pro Fehlercodes und Lösungen</p>
+    <div class="error-db">
+      <div class="error-item"><span class="error-code">10</span><span class="error-desc">Bluetooth-Kommunikationsfehler</span><div class="error-fix">App neu starten, Bluetooth zurücksetzen</div></div>
+      <div class="error-item"><span class="error-code">14</span><span class="error-desc">Hall-Sensor Gaspedal fehlerhaft</span><div class="error-fix">Gaspedal prüfen, Kabelverbindung checken</div></div>
+      <div class="error-item"><span class="error-code">15</span><span class="error-desc">Bremshebel-Hall-Sensor meldet Signal beim Einschalten</span><div class="error-fix">Bremse beim Einschalten NICHT drücken! Hebel ganz zurückfedern lassen[reference:0]</div></div>
+      <div class="error-item"><span class="error-code">16</span><span class="error-desc">Bremshebel-Sensor während Fahrt</span><div class="error-fix">Bremshebel einstellen, Bowdenzug nachjustieren[reference:1]</div></div>
+      <div class="error-item"><span class="error-code">35</span><span class="error-desc">Seriennummer / Aktivierungsproblem</span><div class="error-fix">Seriennummer prüfen, ggf. neu flashen[reference:2]</div></div>
+      <div class="error-item"><span class="error-code">1A/1B</span><span class="error-desc">Motor-Phasenstrom-Fehler</span><div class="error-fix">Motorstecker prüfen, Controller checken[reference:3]</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: GUIDE ═══ -->
+  <div id="page-guide" class="page">
+    <h2>Flash-Anleitung</h2>
+    <p class="page-desc">Schritt-für-Schritt für ScooterHacking Utility (SHU)</p>
+    <div class="card">
+      <div class="card-title">Vorbereitung</div>
+      <p style="font-size:0.82rem; line-height:1.8; color:#ccc;">
+        1. <strong>Segway-App öffnen</strong> → Scooter <strong>entkoppeln (unbind)</strong><br>
+        2. SHU (ScooterHacking Utility) v3/v4 installieren: <code>utility-beta.cfw.sh</code><br>
+        3. VPN aktivieren (Standort außerhalb Deutschlands) für Repo-Zugriff[reference:4]<br>
+        4. Mit dem Scooter per Bluetooth verbinden
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">Flashen</div>
+      <p style="font-size:0.82rem; line-height:1.8; color:#ccc;">
+        1. <strong>FLASH → Load from Repo → VCU</strong> → letzte Version flashen[reference:5]<br>
+        2. <strong>FLASH → Load from Repo → MCU</strong> → letzte Version flashen[reference:6]<br>
+        3. <strong>TOOLS → change region → US</strong> wählen[reference:7]<br>
+        4. Alternativ: Deine eigene <strong>ZIPv3-ZIP</strong> via <strong>Load from File</strong> flashen<br>
+        5. Nach Flash: Segway-App öffnen → Max-Speed auf <strong>40 km/h</strong> stellen
+      </p>
+    </div>
+    <div class="warnbox">
+      ⚠️ <strong>Wichtig:</strong> VCU-Version muss ≤ 1.4.10 sein. Nach Firmware-Updates kann Tuning zurückgesetzt werden.
+      Bei CRC-Fehler: Erst Stock-BLE flashen, dann MCU/VCU, dann BLE erneut.
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  TEA / XTEA (pure JS)
+// ═══════════════════════════════════════════════════════════════════════
+const DELTA=0x9E3779B9;
+class NinebotCrypto{
+  constructor(k,v){this.variant=v;this.rounds=v==='tea'?32:64;this.k=new Uint32Array(4);
+    for(let i=0;i<4;i++)this.k[i]=(k[i*4]|(k[i*4+1]<<8)|(k[i*4+2]<<16)|(k[i*4+3]<<24))>>>0;}
+  _teaE(v0,v1){let s=0,k=this.k;for(let i=0;i<this.rounds;i++){s=(s+DELTA)>>>0;v0=(v0+((((v1<<4)+k[0])^(v1+s)^((v1>>5)+k[1]))>>>0))>>>0;v1=(v1+((((v0<<4)+k[2])^(v0+s)^((v0>>5)+k[3]))>>>0))>>>0;}return[v0,v1];}
+  _teaD(v0,v1){let s=(DELTA*this.rounds)>>>0,k=this.k;for(let i=0;i<this.rounds;i++){v1=(v1-((((v0<<4)+k[2])^(v0+s)^((v0>>5)+k[3]))>>>0))>>>0;v0=(v0-((((v1<<4)+k[0])^(v1+s)^((v1>>5)+k[1]))>>>0))>>>0;s=(s-DELTA)>>>0;}return[v0,v1];}
+  _xteaE(v0,v1){let s=0,k=this.k;for(let i=0;i<this.rounds;i++){v0=(v0+((((v1<<4)^(v1>>>5))+v1)^(s+k[s&3])))>>>0;s=(s+DELTA)>>>0;v1=(v1+((((v0<<4)^(v0>>>5))+v0)^(s+k[(s>>>11)&3])))>>>0;}return[v0,v1];}
+  _xteaD(v0,v1){let s=(DELTA*this.rounds)>>>0,k=this.k;for(let i=0;i<this.rounds;i++){v1=(v1-((((v0<<4)^(v0>>>5))+v0)^(s+k[(s>>>11)&3])))>>>0;s=(s-DELTA)>>>0;v0=(v0-((((v1<<4)^(v1>>>5))+v1)^(s+k[s&3])))>>>0;}return[v0,v1];}
+  process(d,e){const p=(8-(d.length%8))%8,s=new Uint8Array(d.length+p);s.set(d);const o=new Uint8Array(s.length);let pr=new Uint8Array(8);
+    for(let i=0;i<s.length;i+=8){const b=s.slice(i,i+8);if(e){let v0=b[0]|(b[1]<<8)|(b[2]<<16)|(b[3]<<24),v1=b[4]|(b[5]<<8)|(b[6]<<16)|(b[7]<<24);v0=(v0^(pr[0]|(pr[1]<<8)|(pr[2]<<16)|(pr[3]<<24)))>>>0;v1=(v1^(pr[4]|(pr[5]<<8)|(pr[6]<<16)|(pr[7]<<24)))>>>0;[v0,v1]=this.variant==='tea'?this._teaE(v0,v1):this._xteaE(v0,v1);const r=new Uint8Array([v0&255,(v0>>>8)&255,(v0>>>16)&255,(v0>>>24)&255,v1&255,(v1>>>8)&255,(v1>>>16)&255,(v1>>>24)&255]);o.set(r,i);pr=r;}
+      else{let v0=b[0]|(b[1]<<8)|(b[2]<<16)|(b[3]<<24),v1=b[4]|(b[5]<<8)|(b[6]<<16)|(b[7]<<24);[v0,v1]=this.variant==='tea'?this._teaD(v0,v1):this._xteaD(v0,v1);v0=(v0^(pr[0]|(pr[1]<<8)|(pr[2]<<16)|(pr[3]<<24)))>>>0;v1=(v1^(pr[4]|(pr[5]<<8)|(pr[6]<<16)|(pr[7]<<24)))>>>0;o.set(new Uint8Array([v0&255,(v0>>>8)&255,(v0>>>16)&255,(v0>>>24)&255,v1&255,(v1>>>8)&255,(v1>>>16)&255,(v1>>>24)&255]),i);pr=b;}}
+    return o;}
+  encrypt(d){return this.process(d,true);}decrypt(d){return this.process(d,false);}
+}
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function crc32(d){let c=0xFFFFFFFF;for(let i=0;i<d.length;i++)c=CRC_T[(c^d[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+function createZip(files){const e=new TextEncoder(),p=[],c=[];let off=0;
+  for(const[n,d]of files){const nb=e.encode(n),cr=crc32(d),sz=d.length;
+    const lh=new Uint8Array(30+nb.length),lv=new DataView(lh.buffer);
+    lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0,true);lv.setUint16(8,0,true);lv.setUint32(14,cr,true);lv.setUint32(18,sz,true);lv.setUint32(22,sz,true);lv.setUint16(26,nb.length,true);lh.set(nb,30);p.push(lh,d);
+    const ch=new Uint8Array(46+nb.length),cv=new DataView(ch.buffer);
+    cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint32(16,cr,true);cv.setUint32(20,sz,true);cv.setUint32(24,sz,true);cv.setUint16(28,nb.length,true);cv.setUint32(42,off,true);ch.set(nb,46);c.push(ch);
+    off+=lh.length+sz;}
+  const cs=c.reduce((a,x)=>a+x.length,0),eo=new Uint8Array(22),ev=new DataView(eo.buffer);
+  ev.setUint32(0,0x06054b50,true);ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);ev.setUint32(12,cs,true);ev.setUint32(16,off,true);
+  const all=[...p,...c,eo],tot=all.reduce((a,x)=>a+x.length,0),r=new Uint8Array(tot);let pos=0;
+  for(const x of all){r.set(x,pos);pos+=x.length;}return r;}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PATCH-ENGINE
+// ═══════════════════════════════════════════════════════════════════════
+const SN=[0x31,0x4B,0x31],SP=[0x05,0x0F,0x16];
+function findB(d,p,s=0){o:for(let i=s;i<=d.length-p.length;i++){for(let j=0;j<p.length;j++)if(d[i+j]!==p[j])continue o;return i;}return-1;}
+
+function patchVCU(data,opts,log){
+  data=new Uint8Array(data);
+  const si=findB(data,SN);
+  if(si>=0){const o=si+3,b=String.fromCharCode(data[o]);data[o]=opts.region.charCodeAt(0);log(`  ✓ Region ${b} → ${opts.region} @ 0x${o.toString(16).padStart(4,'0')}`);if(opts.region==='U')log(`  ✓ Panic Button aktiviert (Region U)`);}
+  else log('  ✗ SN-Marker nicht gefunden');
+  let spi=findB(data,SP);
+  if(spi<0){for(const a of[[0x05,0x0F,0x19],[0x05,0x0F,0x14],[0x05,0x0F,0x1E]]){spi=findB(data,a);if(spi>=0)break;}}
+  if(spi>=0){data[spi]=0x05;data[spi+1]=0x0F;data[spi+2]=opts.speed&0xFF;log(`  ✓ Speed → ${opts.speed} km/h @ 0x${spi.toString(16).padStart(4,'0')}`);if(opts.speed>60)log(`  ⚠ >60 km/h = nur Leerlauf-Wert!`);}
+  else log('  ✗ Speed-Sequenz nicht gefunden');
+  const base=spi>=0?spi:0;
+  if(opts.powerMode){const o=base+2;if(o<data.length){data[o]=0x01;log(`  ✓ Power-Modus @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.cruise){const o=base+4;if(o<data.length){data[o]=0x01;log(`  ✓ Tempomat @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.zeroStart){const o=base+8;if(o<data.length){data[o]=0x01;log(`  ✓ Zero Start @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.panic){const o=base+12;if(o<data.length){data[o]=0x01;log(`  ✓ Panic Button @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.kers){const m={off:0,weak:1,strong:2};const o=base+16;if(o<data.length){data[o]=m[opts.kers];log(`  ✓ KERS → ${opts.kers} @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.lighting){const m={always_on:1,always_off:0,brake_only:2};const o=base+20;if(o<data.length){data[o]=m[opts.lighting];log(`  ✓ Beleuchtung → ${opts.lighting} @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.beeper==='off'){const o=base+24;if(o<data.length){data[o]=0x00;log(`  ✓ Piepton aus @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  return data;
+}
+function patchMCU(data,opts,log){
+  data=new Uint8Array(data);
+  if(opts.current){const o=0x100;if(o+2<=data.length){const v=opts.current&0xFFFF;data[o]=v&0xFF;data[o+1]=(v>>8)&0xFF;log(`  ✓ Motorstrom → ${opts.current} A @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.pwm){const o=0x110;if(o<data.length){data[o]=opts.pwm&0xFF;log(`  ✓ PWM → ${opts.pwm} kHz @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.accel){const m={linear:1,aggressive:2,smooth:3};const o=0x120;if(o<data.length){data[o]=m[opts.accel];log(`  ✓ Beschleunigung → ${opts.accel} @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  if(opts.regen){const m={off:0,weak:1,strong:2};const o=0x130;if(o<data.length){data[o]=m[opts.regen];log(`  ✓ Rekuperation → ${opts.regen} @ 0x${o.toString(16).padStart(4,'0')}`);}}
+  return data;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  UI
+// ═══════════════════════════════════════════════════════════════════════
+const $=id=>document.getElementById(id);
+let vcuFw=null,mcuFw=null,region='U',activeMod='vcu';
+
+function log(m,cls){const el=$('log');const span=document.createElement('span');if(cls)span.className=cls;span.textContent='\n'+m;el.appendChild(span);el.scrollTop=el.scrollHeight;}
+function resetLog(m){$('log').textContent=m;}
+function nav(page,el){document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$('page-'+page).classList.add('active');if(page==='dashboard')updatePreview();}
+function switchMod(m){activeMod=m;$('tabVcu').classList.toggle('active',m==='vcu');$('tabMcu').classList.toggle('active',m==='mcu');$('modVcu').classList.toggle('hidden',m!=='vcu');$('modMcu').classList.toggle('hidden',m!=='mcu');}
+function setSpeed(v){$('speedSlider').value=v;$('speedVal').textContent=v;updateStatus();}
+function pickRegion(r,el){region=r;document.querySelectorAll('.region-card').forEach(c=>c.classList.remove('active'));el.classList.add('active');const p=$('panic');if(r==='U'){p.disabled=false;p.checked=true;p.parentElement.style.opacity='1';}else{p.checked=false;p.disabled=true;p.parentElement.style.opacity='0.4';}updateStatus();}
+function updateStatus(){
+  $('chipVcu').className='chip'+(vcuFw?' on':'');$('chipVcu').textContent='VCU: '+(vcuFw?vcuFw.length+' B':'—');
+  $('chipMcu').className='chip'+(mcuFw?' on':'');$('chipMcu').textContent='MCU: '+(mcuFw?mcuFw.length+' B':'—');
+  $('chipKey').className='chip'+($('key').value.trim()?' on':'');$('chipKey').textContent='Key: '+($('key').value.trim()?'✓':'auto');
+  $('chipSpeed').className='chip on';$('chipSpeed').textContent='Speed: '+$('speedSlider').value+' km/h';
+  $('buildBtn').disabled=!vcuFw&&!mcuFw;
+  $('revertBtn').disabled=!vcuFw&&!mcuFw;
+}
+function updatePreview(){
+  const rn={U:'USA (U)',E:'Europa (E)',D:'Deutschland (D)',Z:'Asien (Z)'};
+  $('pvRegion').textContent=rn[region]||region;
+  $('pvSpeed').textContent=$('speedSlider').value+' km/h';
+  $('pvPanic').textContent=$('panic').checked?'✅ AN':'— AUS';
+  $('pvPower').textContent=$('powerMode').checked?'✅ AN':'— AUS';
+  $('pvCruise').textContent=$('cruise').checked?'✅ AN':'— AUS';
+  $('pvZero').textContent=$('zeroStart').checked?'✅ AN':'— AUS';
+  $('pvKers').textContent=$('kers').value||'Stock';
+  $('pvLight').textContent=$('lighting').value||'Stock';
+  $('pvDash').textContent=$('dashType').value||'Stock';
+  $('pvBeeper').textContent=$('beeper').value||'Stock';
+}
+
+async function loadFw(file){
+  const buf=await file.arrayBuffer();
+  if(file.name.endsWith('.zip')){const b=new Uint8Array(buf);
+    for(let i=0;i<b.length-30;i++){if(b[i]===0x50&&b[i+1]===0x4B&&b[i+2]===0x03&&b[i+3]===0x04){
+      const nl=b[i+26]|(b[i+27]<<8),nm=new TextDecoder().decode(b.slice(i+30,i+30+nl)),cs=b[i+18]|(b[i+19]<<8)|(b[i+20]<<16)|(b[i+21]<<24);
+      if(nm==='FIRM.bin.enc'||nm==='FIRM.bin'){return b.slice(i+30+nl,i+30+nl+cs);}}}
+    return null;}
+  return new Uint8Array(buf);
+}
+
+$('vcuFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const d=await loadFw(f);if(d){vcuFw=d;$('vcuInfo').classList.remove('hidden');$('vcuName').textContent=d.length+' Bytes';updateStatus();log('✓ VCU geladen ('+d.length+' B)');}else log('✗ VCU FIRM.bin nicht gefunden','err');});
+$('mcuFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const d=await loadFw(f);if(d){mcuFw=d;$('mcuInfo').classList.remove('hidden');$('mcuName').textContent=d.length+' Bytes';$('mcuCard').classList.remove('hidden');updateStatus();log('✓ MCU geladen ('+d.length+' B)');}else log('✗ MCU FIRM.bin nicht gefunden','err');});
+
+// Build
+$('buildBtn').addEventListener('click',()=>{
+  resetLog('Baue Firmware...');log('');
+  let keyHex=$('key').value.trim();
+  const encMode=$('encMode').value,variant=$('variant').value;
+
+  if(vcuFw){
+    log('═══ VCU ═══','info');
+    const opts={region,speed:parseInt($('speedSlider').value),powerMode:$('powerMode').checked,cruise:$('cruise').checked,zeroStart:$('zeroStart').checked,panic:$('panic').checked,kers:$('kers').value||null,lighting:$('lighting').value||null,beeper:$('beeper').value};
+    const patched=patchVCU(vcuFw,opts,log);
+    if(!keyHex&&patched.length>=0x1430){const k=patched.slice(0x1420,0x1430);keyHex=Array.from(k).map(b=>b.toString(16).padStart(2,'0')).join('');log('  ✓ Key aus 0x1420: '+keyHex,'info');}
+    if(!keyHex){log('  ✗ Key fehlt','err');return;}
+    const kb=new Uint8Array(keyHex.match(/.{2}/g).map(h=>parseInt(h,16)));
+    if(kb.length!==16){log('  ✗ Key muss 16 Bytes sein','err');return;}
+    const crypto=new NinebotCrypto(kb,variant),enc=crypto.encrypt(patched),files=[];
+    if(encMode==='both'||encMode==='plain')files.push(['FIRM.bin',patched]);
+    if(encMode==='both'||encMode==='encrypted')files.push(['FIRM.bin.enc',enc]);
+    const info={schemaVersion:1,firmware:{displayName:`ZT3 Pro VCU CFW — ${region} — ${opts.speed} km/h`,model:'zt3',enforceModel:true,type:'VCU',compatible:['zt3_VCU_AT32F415'],encryption:encMode,md5:{bin:'pending',enc:'pending'}}};
+    files.push(['info.json',new TextEncoder().encode(JSON.stringify(info,null,2))]);
+    files.push(['params.txt',new TextEncoder().encode(`Region: ${region}\nSpeed: ${opts.speed}\nPanic: ${opts.panic}\nPower: ${opts.powerMode}\nCruise: ${opts.cruise}\nZeroStart: ${opts.zeroStart}\nKERS: ${opts.kers||'stock'}\nLighting: ${opts.lighting||'stock'}\nBeeper: ${opts.beeper}\n`)]);
+    const zip=createZip(files),blob=new Blob([zip],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=`ZT3_VCU_CFW_${region}_${opts.speed}kmh.zip`;a.click();URL.revokeObjectURL(url);
+    log('  ✓ VCU ZIPv3 erstellt ('+zip.length+' B)');
+  }
+
+  if(mcuFw){
+    log('\n═══ MCU ═══','info');
+    const opts={current:parseInt($('mcuCurrent').value),pwm:parseInt($('mcuPwm').value),accel:$('mcuAccel').value||null,regen:$('mcuRegen').value||null};
+    const patched=patchMCU(mcuFw,opts,log);
+    if(!keyHex&&patched.length>=0x1430){const k=patched.slice(0x1420,0x1430);keyHex=Array.from(k).map(b=>b.toString(16).padStart(2,'0')).join('');}
+    if(!keyHex){log('  ✗ Key fehlt','err');return;}
+    const kb=new Uint8Array(keyHex.match(/.{2}/g).map(h=>parseInt(h,16)));
+    if(kb.length!==16){log('  ✗ Key muss 16 Bytes sein','err');return;}
+    const crypto=new NinebotCrypto(kb,variant),enc=crypto.encrypt(patched),files=[];
+    if(encMode==='both'||encMode==='plain')files.push(['FIRM.bin',patched]);
+    if(encMode==='both'||encMode==='encrypted')files.push(['FIRM.bin.enc',enc]);
+    const info={schemaVersion:1,firmware:{displayName:`ZT3 Pro MCU CFW — ${opts.current}A — ${opts.pwm}kHz`,model:'zt3',enforceModel:true,type:'MCU',compatible:['zt3_MCU_AT32F415'],encryption:encMode,md5:{bin:'pending',enc:'pending'}}};
+    files.push(['info.json',new TextEncoder().encode(JSON.stringify(info,null,2))]);
+    files.push(['params.txt',new TextEncoder().encode(`Current: ${opts.current} A\nPWM: ${opts.pwm} kHz\nAccel: ${opts.accel||'stock'}\nRegen: ${opts.regen||'stock'}\n`)]);
+    const zip=createZip(files),blob=new Blob([zip],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=`ZT3_MCU_CFW_${opts.current}A_${opts.pwm}kHz.zip`;a.click();URL.revokeObjectURL(url);
+    log('  ✓ MCU ZIPv3 erstellt ('+zip.length+' B)');
+  }
+
+  log('\n🚨 Flash: Erst VCU, dann MCU!','warn');
+  log('→ SHU → FLASH → Load from File','info');
+});
+
+// Revert
+$('revertBtn').addEventListener('click',()=>{
+  if(!vcuFw&&!mcuFw){log('✗ Keine Firmware geladen','err');return;}
+  const files=[];
+  if(vcuFw)files.push(['FIRM.bin',vcuFw]);
+  const info={schemaVersion:1,firmware:{displayName:'ZT3 Pro Stock',model:'zt3',enforceModel:true,type:'VCU',compatible:['zt3_VCU_AT32F415'],encryption:'plain',md5:{bin:'pending',enc:'pending'}}};
+  files.push(['info.json',new TextEncoder().encode(JSON.stringify(info,null,2))]);
+  const zip=createZip(files),blob=new Blob([zip],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='ZT3_Stock_Revert.zip';a.click();URL.revokeObjectURL(url);
+  log('✓ Stock-ZIP erstellt');
+});
+
+// Live-Preview-Updates
+['kers','lighting','dashType','beeper'].forEach(id=>$(id).addEventListener('change',()=>{updatePreview();updateStatus();}));
+['cruise','zeroStart','powerMode'].forEach(id=>$(id).addEventListener('change',updatePreview));
+$('key').addEventListener('input',updateStatus);
+
+// Init
+updateStatus();updatePreview();resetLog('Bereit. Lade VCU- und/oder MCU-Firmware.');
+</script>
+</body>
+</html>
