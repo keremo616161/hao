@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>X3 Builder</title>
+<title>X3 Builder — ZT3 Pro CFW</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   :root {
@@ -1135,7 +1135,7 @@
           <h3>⚡ Ultimate Firmware Builder</h3>
           <p>Erstelle Custom Firmware für die Ninebot X3-Serie mit vollständiger Modul-Unterstützung, individuellem Unlock-Code und ZIPv3-konformem Output.</p>
           <div style="margin-top:12px;">
-            <span class="badge purple">v15.0</span>
+            <span class="badge purple">v16.0</span>
             <span class="badge green">ZIPv3</span>
             <span class="badge">MD5</span>
             <span class="badge">XTEA</span>
@@ -1196,7 +1196,7 @@
 <div class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <h1>X3</h1>
-    <p>Builder v15</p>
+    <p>Builder v16</p>
   </div>
   <div class="sidebar-item active" onclick="sidebarNav('builder', this)">
     <span class="icon">🔧</span><span>Firmware bauen</span>
@@ -1397,12 +1397,14 @@ function patchVCU(data,opts,log){
 
 // ═══════════════════════════════════════════════════════════════════════
 //  ROLLER → ZIPv3 IDENTIFIERS
+//  Model: "zt3" (da Scooter dies meldet)
+//  enforceModel: false (da Scooter bereits unlocked ist)
 // ═══════════════════════════════════════════════════════════════════════
 const ROLLER_IDS = {
   g3:  { model: 'max', compatible: ['max_DRV_AT32F415CxT7'] },
-  zt3: { model: 'f',   compatible: ['f_DRV_AT32F415CxT7'] },
+  zt3: { model: 'zt3', compatible: ['zt3_DRV_AT32F415CxT7'] },
   f3:  { model: 'f',   compatible: ['f_DRV_AT32F415CxT7'] },
-  gt3d:{ model: 'f',   compatible: ['f_DRV_AT32F415CxT7'] },
+  gt3d:{ model: 'zt3', compatible: ['zt3_DRV_AT32F415CxT7'] },
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1576,7 +1578,7 @@ function buildFirmware() {
     firmware: {
       displayName: `X3 ${state.roller.toUpperCase()} CFW — ${state.module.toUpperCase()}`,
       model: rollerIds.model,
-      enforceModel: true,
+      enforceModel: false,
       type: 'VCU',
       compatible: rollerIds.compatible,
       encryption: $('encModeSelect').value,
@@ -1590,6 +1592,7 @@ function buildFirmware() {
   log('═══ ZIPv3-Identifiers ═══', 'info');
   log(`  type:         VCU`);
   log(`  model:        ${rollerIds.model}`);
+  log(`  enforceModel: false`);
   log(`  compatible:   ${rollerIds.compatible.join(', ')}`);
   log('');
 
@@ -1605,6 +1608,7 @@ Panic-Hold:     ${panicHold}
 Standard-Combo: ${defaultCombo}
 Type:           VCU
 Model:          ${rollerIds.model}
+enforceModel:   false
 Compatible:     ${rollerIds.compatible.join(', ')}
 MD5 (bin):      ${md5Bin}
 MD5 (enc):      ${md5Enc}
