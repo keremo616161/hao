@@ -7,118 +7,225 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #0b0e14;
-    --panel: #11151c;
-    --card: #161b22;
-    --border: #21262d;
-    --accent: #3fb950;
-    --accent-dim: #238636;
-    --text: #c9d1d9;
-    --muted: #8b949e;
-    --danger: #f85149;
-    --warn: #d29922;
-    --info: #58a6ff;
+    --bg: #0a0c12;
+    --panel: #12151d;
+    --card: #171b24;
+    --card-hover: #1c2029;
+    --border: #232834;
+    --accent: #6c5ce7;
+    --accent-glow: #8b7cf0;
+    --accent-dim: #4a3fa8;
+    --green: #00d68f;
+    --red: #ff4757;
+    --warn: #ffb800;
+    --info: #4da6ff;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --dim: #3a3f4d;
+    --sidebar-w: 260px;
   }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    display: flex;
+    overflow-x: hidden;
   }
 
-  /* ─── SIDEBAR ─── */
-  .sidebar {
-    width: 260px;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    padding: 20px 0;
+  /* ═══ HAMBURGER TOGGLE ═══ */
+  .toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 44px;
+    height: 44px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .toggle-btn:hover {
+    background: var(--card-hover);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
+  }
+  .toggle-btn span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+  }
+  .toggle-btn.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+    background: var(--accent-glow);
+  }
+  .toggle-btn.active span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  .toggle-btn.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+    background: var(--accent-glow);
+  }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar {
     position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-w);
     height: 100vh;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 80px 0 20px;
+    z-index: 900;
+    transform: translateX(0);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
+    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
+  }
+  .sidebar.collapsed {
+    transform: translateX(-100%);
   }
   .sidebar-header {
-    padding: 0 20px 20px;
+    padding: 0 24px 24px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 8px;
+    margin-bottom: 16px;
   }
   .sidebar-header h1 {
     font-size: 1.15rem;
-    color: #fff;
-    font-weight: 600;
-    letter-spacing: -0.3px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-glow), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
   }
-  .sidebar-header .version {
+  .sidebar-header p {
     font-size: 0.7rem;
     color: var(--muted);
-    margin-top: 2px;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
   }
   .nav-item {
-    padding: 10px 20px;
+    padding: 12px 24px;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     color: var(--muted);
-    border-left: 2px solid transparent;
-    transition: all 0.15s;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    transition: all 0.2s;
+    position: relative;
+    font-weight: 500;
   }
-  .nav-item:hover {
-    background: rgba(255,255,255,0.03);
-    color: var(--text);
+  .nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+    transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .nav-item:hover { background: rgba(108, 92, 231, 0.06); color: var(--text); }
   .nav-item.active {
-    background: rgba(63,185,80,0.08);
-    color: var(--accent);
-    border-left-color: var(--accent);
+    background: linear-gradient(90deg, rgba(108, 92, 231, 0.15), transparent);
+    color: var(--accent-glow);
   }
-  .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-item.active::before { height: 60%; }
+  .nav-item .icon { font-size: 1.05rem; width: 22px; text-align: center; }
+  .nav-item .label { flex: 1; }
 
-  /* ─── MAIN ─── */
+  /* ═══ OVERLAY ═══ */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 850;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    backdrop-filter: blur(2px);
+  }
+  .overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ═══ MAIN ═══ */
   .main {
-    margin-left: 260px;
-    flex: 1;
-    padding: 32px 40px;
+    padding: 80px 40px 40px;
     max-width: 1000px;
+    margin: 0 auto;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .page { display: none; }
+  .page { display: none; animation: fadeIn 0.35s ease-out; }
   .page.active { display: block; }
-
-  .page-header {
-    margin-bottom: 24px;
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
+
+  .page-header { margin-bottom: 24px; }
   .page-header h2 {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #fff;
-    font-weight: 600;
+    letter-spacing: -0.5px;
     margin-bottom: 4px;
   }
-  .page-header p {
-    font-size: 0.82rem;
-    color: var(--muted);
-  }
+  .page-header p { font-size: 0.85rem; color: var(--muted); }
 
-  /* ─── CARDS ─── */
+  /* ═══ CARDS ═══ */
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 14px;
     padding: 20px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
+    transition: all 0.25s;
   }
+  .card:hover { border-color: var(--dim); }
   .card-title {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     margin-bottom: 16px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-dim);
+    color: var(--accent-glow);
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
   }
 
-  /* ─── FORM ─── */
+  /* ═══ FORM ═══ */
   label {
     display: flex;
     align-items: center;
@@ -132,175 +239,307 @@
     background: var(--panel);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 7px 10px;
-    border-radius: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
     font-size: 0.83rem;
     outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
   }
-  select:focus, input:focus { border-color: var(--accent); }
+  select:focus, input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+  }
   input[type="checkbox"] {
-    accent-color: var(--accent);
+    appearance: none;
+    width: 40px;
+    height: 22px;
+    background: var(--dim);
+    border-radius: 11px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+  input[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
     width: 18px;
     height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  input[type="checkbox"]:checked { background: var(--accent); }
+  input[type="checkbox"]:checked::after { transform: translateX(18px); }
+  input[type="checkbox"]:disabled { opacity: 0.4; cursor: not-allowed; }
+
   input[type="file"] {
     background: var(--panel);
-    border: 1px dashed var(--border);
-    padding: 16px;
-    border +-radius: ( 8px;
-    width:l 100%;
+    border: 2px dashed var(--border);
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
     color: var(--muted);
     cursor: pointer;
-    font-size: 0.83rem;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    font-family: inherit;
   }
-  input[type="file"]:hover { border-color: var(--sw >>accent); }
+  input[type="file"]:hover { border-color: var(--accent); color: var(--text); }
+
   input[type="range"] {
     width: 100%;
-    accent-color: var(--accent);
+    appearance: none;
+    height: 6px;
+    background: var(--dim);
+    border-radius: 3px;
+    outline: none;
+    margin: 12px 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(108, 92, 231, 0.5);
+    transition: all 0.2s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 20px rgba(108, 92, 231, 0.8);
   }
 
-  /* ─── BUTTONS ─── */
+  /* ═══ BUTTONS ═══ */
   .btn {
-    background: var(--accent);
-    color: #000;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+    color: #fff;
     border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
+    padding: 14px 24px;
+    border-radius: 10px;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     width: 100%;
-    transition: background 0.15s;
+    transition: all 0.25s;
+    letter-spacing: 0.3px;
+    font-family: inherit;
   }
-  .btn:hover { background: #4ac95e; }
-  .btn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-  .btn-secondary {
-    background: #21262d;
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4);
+  }
+  .btn:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { background: var(--dim); color: var(--muted); cursor: not-allowed; }
+  .btn-sec {
+    background: var(--card);
+    border: 1px solid var(--border);
     color: var(--text);
     margin-top: 8px;
   }
-  .btn-secondary:hover { background: #30363d; }
+  .btn-sec:hover:not(:disabled) {
+    background: var(--card-hover);
+    border-color: var(--accent);
+    box-shadow: none;
+  }
 
-  /* ─── REGION GRID ─── */
+  /* ═══ REGION GRID ═══ */
   .region-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+    margin-bottom: 16px;
   }
   .region-card {
-    padding: 14px;
-    border-radius: 8px;
+    padding: 16px 12px;
+    border-radius: 12px;
     background: var(--panel);
     border: 1px solid var(--border);
     cursor: pointer;
     text-align: center;
-    transition: all 0.15s;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
   }
-  .region-card:hover { border-color: #484f58; }
-  .region-card.active { border-color: var(--accent); background: rgba(63,185,80,0.08); }
-  .region-card .flag { font-size: 1.4rem; margin-bottom: 4px; }
+  .region-card:hover { border-color: var(--dim); transform: translateY(-2px); }
+  .region-card.active {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(0, 214, 143, 0.05));
+  }
+  .region-card.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(108, 92, 231, 0.2), transparent 60%);
+    pointer-events: none;
+  }
+  .region-card .flag { font-size: 1.5rem; margin-bottom: 6px; }
   .region-card .name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
-  .region-card .speed { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
-  .region-card.active .name { color: var(--accent); }
+  .region-card .speed { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+  .region-card.active .name { color: var(--accent-glow); }
 
-  /* ─── SPEED DISPLAY ─── */
-  .speed-display {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--accent);
-    text-align: center;
-    font-family: 'SF Mono', monospace;
+  /* ═══ SPEED DISPLAY ═══ */
+  .speed-hero { text-align: center; margin: 8px 0 12px; }
+  .speed-hero .val {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-glow), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -2px;
+    line-height: 1;
   }
-  .speed-unit { font-size: 0.9rem; color: var(--muted); }
+  .speed-hero .unit { font-size: 1rem; color: var(--muted); font-weight: 500; }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .slider-labels .theo { opacity: 0.5; font-style: italic; }
 
-  /* ─── LOG ─── */
+  /* ═══ LOG ═══ */
   .log-box {
-    background: #0d1117;
+    background: #060810;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
+    border-radius: 12px;
+    padding: 16px;
     font-family: 'SF Mono', 'Consolas', monospace;
     font-size: 0.75rem;
     max-height: 300px;
     overflow-y: auto;
     white-space: pre-wrap;
-    color: var(--accent);
-    line-height: 1.6;
+    color: var(--green);
+    line-height: 1.7;
+    margin-top: 16px;
   }
-  .log-box .err { color: var(--danger); }
+  .log-box .err { color: var(--red); }
   .log-box .warn { color: var(--warn); }
   .log-box .info { color: var(--info); }
 
-  /* ─── WARNBOX ─── */
+  /* ═══ CHIPS ═══ */
+  .status-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .chip {
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: var(--panel);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-weight: 500;
+    transition: all 0.25s;
+  }
+  .chip.on {
+    background: rgba(0, 214, 143, 0.1);
+    color: var(--green);
+    border-color: rgba(0, 214, 143, 0.3);
+  }
+  .chip.warn {
+    background: rgba(255, 184, 0, 0.1);
+    color: var(--warn);
+    border-color: rgba(255, 184, 0, 0.3);
+  }
+
+  /* ═══ INFO BOXES ═══ */
   .warnbox {
-    background: rgba(210,153,34,0.08);
-    border: 1px solid rgba(210,153,34,0.3);
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 0.78rem;
+    background: rgba(255, 184, 0, 0.06);
+    border: 1px solid rgba(255, 184, 0, 0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.8rem;
     color: var(--warn);
     margin-top: 16px;
     line-height: 1.6;
   }
   .infobox {
-    background: rgba(88,166,255,0.08);
-    border: 1px solid rgba(88,166,255,0.3);
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 0.78rem;
+    background: rgba(77, 166, 255, 0.06);
+    border: 1px solid rgba(77, 166, 255, 0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.8rem;
     color: var(--info);
     margin-top: 12px;
     line-height: 1.6;
   }
 
-  /* ─── STATUS BAR ─── */
-  .status-bar {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-  .chip {
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: var(--panel);
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-  .chip.on { background: rgba(63,185,80,0.1); color: var(--accent); border-color: rgba(63,185,80,0.4); }
-  .chip.warn { background: rgba(210,153,34,0.1); color: var(--warn); border-color: rgba(210,153,34,0.4); }
-
   .hidden { display: none !important; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  @media (max-width: 900px) {
-    .sidebar { width: 60px; }
-    .sidebar-header h1, .sidebar-header .version, .nav-item span:not(.icon) { display: none; }
-    .nav-item { justify-content: center; padding: 12px 0; }
-    .main { margin-left: 60px; padding: 16px; }
+  /* ═══ PREVIEW TABLE ═══ */
+  .preview-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  .preview-table td { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .preview-table td:first-child { color: var(--muted); width: 45%; }
+  .preview-table td:last-child { font-family: 'SF Mono', monospace; color: var(--text); }
+  .preview-table tr:last-child td { border-bottom: none; }
+  .preview-table .val-on { color: var(--green); }
+  .preview-table .val-off { color: var(--muted); }
+
+  /* ═══ ERROR DB ═══ */
+  .error-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.84rem;
+  }
+  .error-item:last-child { border-bottom: none; }
+  .error-code {
+    display: inline-block;
+    background: rgba(255, 71, 87, 0.15);
+    color: var(--red);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-family: 'SF Mono', monospace;
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin-right: 10px;
+  }
+  .error-fix {
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 4px;
+    margin-left: 44px;
+  }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 800px) {
+    .main { padding: 80px 16px 40px; }
+    .grid2 { grid-template-columns: 1fr; }
+    .region-grid { grid-template-columns: repeat(2, 1fr); }
+    .speed-hero .val { font-size: 2.4rem; }
   }
 </style>
 </head>
 <body>
 
+<!-- ═══ HAMBURGER ═══ -->
+<div class="toggle-btn active" id="toggleBtn" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</div>
+
+<!-- ═══ OVERLAY ═══ -->
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
 <!-- ═══ SIDEBAR ═══ -->
-<nav class="sidebar">
+<nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <h1>⚡ ZT3 Builder</h1>
-    <div class="version">Ultimate v8.0</div>
+    <p>Ultimate v9.0</p>
   </div>
   <div class="nav-item active" onclick="nav('build', this)">
-    <span class="icon">🔧</span><span>Firmware bauen</span>
+    <span class="icon">🔧</span><span class="label">Firmware bauen</span>
   </div>
   <div class="nav-item" onclick="nav('dashboard', this)">
-    <span class="icon">📊</span><span>Vorschau</span>
+    <span class="icon">📊</span><span class="label">Vorschau</span>
   </div>
   <div class="nav-item" onclick="nav('errors', this)">
-    <span class="icon">⚠️</span><span>Fehlercodes</span>
+    <span class="icon">⚠️</span><span class="label">Fehlercodes</span>
   </div>
   <div class="nav-item" onclick="nav('guide', this)">
-    <span class="icon">📖</span><span>Anleitung</span>
+    <span class="icon">📖</span><span class="label">Flash-Anleitung</span>
   </div>
 </nav>
 
@@ -314,27 +553,24 @@
       <p>VCU/MCU Custom Firmware für ZT3 Pro · ZIPv3-konform</p>
     </div>
 
-    <div class="status-bar" id="statusBar">
+    <div class="status-bar">
       <span class="chip" id="chipVcu">VCU: —</span>
-      <span class="chip" id="chipMcu">MCU: —</span>
       <span class="chip" id="chipKey">Key: —</span>
-      <span class="chip" id="chipSpeed">Speed: —</span>
+      <span class="chip on" id="chipSpeed">Speed: 40 km/h</span>
     </div>
 
-    <!-- Schritt 1 -->
     <div class="card">
-      <div class="card-title">1 · Firmware-Quelle</div>
+      <div class="card-title"><span class="num">1</span> Firmware-Quelle</div>
       <input type="file" id="vcuFile" accept=".bin,.zip">
-      <div id="vcuInfo" class="hidden" style="margin-top:10px;">
-        <span class="chip on" id="vcuBadge">geladen</span>
+      <div id="vcuInfo" class="hidden" style="margin-top:12px;">
+        <span class="chip on">✓ geladen</span>
         <span id="vcuName" style="margin-left:8px; color:var(--muted); font-size:0.8rem;"></span>
       </div>
     </div>
 
-    <!-- Schritt 2 -->
     <div class="card">
-      <div class="card-title">2 · Region &amp; Geschwindigkeit</div>
-      <div class="region-grid" style="margin-bottom:16px;">
+      <div class="card-title"><span class="num">2</span> Region &amp; Geschwindigkeit</div>
+      <div class="region-grid">
         <div class="region-card active" data-region="U" onclick="pickRegion('U', this)">
           <div class="flag">🇺🇸</div><div class="name">USA</div><div class="speed">40 km/h · Panic</div>
         </div>
@@ -348,18 +584,17 @@
           <div class="flag">🌏</div><div class="name">Asien</div><div class="speed">32 km/h</div>
         </div>
       </div>
-      <div style="text-align:center; margin-bottom:8px;">
-        <span class=" speed-display" id="speedVal">40</span><span class="speed-unit"> km/h</span>
+      <div class="speed-hero">
+        <span class="val" id="speedVal">40</span><span class="unit"> km/h</span>
       </div>
       <input type="range" id="speedSlider" min="5" max="127" value="40" step="1" oninput="setSpeed(this.value)">
-      <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--muted); margin-top:4px;">
-        <span>5</span><span>25</span><span>40</span><span>60</span><span class="theoretical">127</span>
+      <div class="slider-labels">
+        <span>5</span><span>25</span><span>40</span><span>60</span><span class="theo">127</span>
       </div>
     </div>
 
-    <!-- Schritt 3 -->
     <div class="card">
-      <div class="card-title">3 · Features</div>
+      <div class="card-title"><span class="num">3</span> Features</div>
       <div class="grid2">
         <div>
           <label><span class="lbl">🚨 Panic Button</span><input type="checkbox" id="panic" checked disabled></label>
@@ -371,7 +606,7 @@
           <label><span class="lbl">🔋 KERS</span>
             <select id="kers"><option value="">Stock</option><option value="off">Aus</option><option value="weak">Schwach</option><option value="strong" selected>Stark</option></select>
           </label>
-          <label><span class="lbl">💡 Beleuchtung</span>
+          <label><span class="lbl">💡 Licht</span>
             <select id="lighting"><option value="">Stock</option><option value="always_on">Immer an</option><option value="always_off">Immer aus</option><option value="brake_only">Nur Bremsen</option></select>
           </label>
           <label><span class="lbl">🔔 Piepton</span>
@@ -381,11 +616,10 @@
       </div>
     </div>
 
-    <!-- Schritt 4: Crypto -->
     <div class="card">
-      <div class="card-title">4 · Verschlüsselung</div>
+      <div class="card-title"><span class="num">4</span> Verschlüsselung</div>
       <label><span class="lbl">Unlock-Key (Hex)</span>
-        <input type="text" id="key" placeholder="auto aus 0x1420" style="width:220px; font-family:monospace; font-size:0.72rem;"></label>
+        <input type="text" id="key" placeholder="auto aus 0x1420" style="width:200px; font-family:monospace; font-size:0.72rem;"></label>
       <label><span class="lbl">Verschlüsselung</span>
         <select id="variant"><option value="xtea">XTEA (neu)</option><option value="tea">TEA (alt)</option></select></label>
       <label><span class="lbl">ZIPv3-Modus</span>
@@ -393,12 +627,12 @@
     </div>
 
     <button class="btn" id="buildBtn" disabled>🔧 Firmware bauen &amp; ZIPv3 erstellen</button>
-    <button class="btn btn-secondary" id="revertBtn" disabled>↩ Revert to Stock</button>
+    <button class="btn btn-sec" id="revertBtn" disabled>↩ Revert to Stock</button>
 
-    <div class="log-box" id="log" style="margin-top:16px;">Bereit.</div>
+    <div class="log-box" id="log">Bereit. Lade eine VCU-Firmware.</div>
 
     <div class="warnbox">
-      ⚠️ <strong>Flash-Reihenfolge:</strong> Erst VCU, dann MCU. VCU ≤ 1.4.10. Vor Flash entkoppeln!
+      ⚠️ <strong>Flash-Reihenfolge:</strong> Erst VCU, dann MCU. VCU ≤ 1.4.10. Vor Flash in der Segway-App entkoppeln!
     </div>
   </div>
 
@@ -410,15 +644,16 @@
     </div>
     <div class="card">
       <div class="card-title">Konfiguration</div>
-      <table style="width:100%; font-size:0.83rem; border-collapse:collapse;">
-        <tr><td style="padding:6px 0; color:var(--muted);">Region</td><td id="pvRegion" style="font-family:monospace;">USA (U)</td></tr>
-        <tr><td style="padding:6px 0; color:var(--muted);">Max Speed</td><td id="pvSpeed" style="font-family:monospace; color:var(--accent);">40 km/h</td></tr>
-        <tr><td style="padding:6px 0; color:var(--muted);">Panic Button</td><td id="pvPanic" style="font-family:monospace;">✅ AN</td></tr>
-        <tr><td style="padding:6px 0; color:var(--muted);">Power-Modus</td><td id="pvPower" style="font-family:monospace;">✅ AN</td></tr>
-        <tr><td style="padding:6px 0; color:var(--muted);">Tempomat</td><td id="pvCruise" style="font-family:monospace;">— AUS</td></tr>
-        <tr><td style="padding:6px 0; color:var(--muted);">Zero Start</td><td id="pvZero" style="font-family:monospace;">— AUS</td></tr>
-        <tr><td style="padding:6px 0; color:var(--muted);">KERS</td><td id="pvKers" style="font-family:monospace;">Stark</td></tr>
-        <tr><td style="padding:6px 0; color:var(--muted);">Beleuchtung</td><td id="pvLight" style="font-family:monospace;">Stock</td></tr>
+      <table class="preview-table">
+        <tr><td>Region</td><td id="pvRegion">USA (U)</td></tr>
+        <tr><td>Max Speed</td><td id="pvSpeed" class="val-on">40 km/h</td></tr>
+        <tr><td>Panic Button</td><td id="pvPanic" class="val-on">✅ AN</td></tr>
+        <tr><td>Power-Modus</td><td id="pvPower" class="val-on">✅ AN</td></tr>
+        <tr><td>Tempomat</td><td id="pvCruise" class="val-off">— AUS</td></tr>
+        <tr><td>Zero Start</td><td id="pvZero" class="val-off">— AUS</td></tr>
+        <tr><td>KERS</td><td id="pvKers">Stark</td></tr>
+        <tr><td>Licht</td><td id="pvLight">Stock</td></tr>
+        <tr><td>Piepton</td><td id="pvBeeper">Stock</td></tr>
       </table>
     </div>
   </div>
@@ -427,15 +662,28 @@
   <div id="page-errors" class="page">
     <div class="page-header">
       <h2>Fehlercodes</h2>
-      <p>Bekannte ZT3 Pro Fehlercodes und Lösungen</p>
+      <p>Bekannte ZT3 Pro Fehler und Lösungen</p>
     </div>
     <div class="card">
-      <div class="card-title">Datenbank</div>
-      <div style="font-size:0.8rem; line-height:2;">
-        <div><span style="color:var(--danger); font-family:monospace;">15</span> — Bremshebel beim Einschalten gedrückt</div>
-        <div><span style="color:var(--danger); font-family:monospace;">16</span> — Bremshebel-Sensor während Fahrt</div>
-        <div><span style="color:var(--danger); font-family:monospace;">35</span> — Seriennummer / Aktivierung</div>
-        <div><span style="color:var(--danger); font-family:monospace;">1A/1B</span> — Motor-Phasenstrom</div>
+      <div class="error-item">
+        <span class="error-code">15</span><span>Bremshebel beim Einschalten gedrückt</span>
+        <div class="error-fix">→ Bremse NICHT beim Einschalten drücken</div>
+      </div>
+      <div class="error-item">
+        <span class="error-code">16</span><span>Bremshebel-Sensor während Fahrt</span>
+        <div class="error-fix">→ Bowdenzug nachjustieren</div>
+      </div>
+      <div class="error-item">
+        <span class="error-code">35</span><span>Seriennummer / Aktivierung</span>
+        <div class="error-fix">→ Seriennummer prüfen, ggf. neu flashen</div>
+      </div>
+      <div class="error-item">
+        <span class="error-code">1A/1B</span><span>Motor-Phasenstrom</span>
+        <div class="error-fix">→ Motorstecker und Controller prüfen</div>
+      </div>
+      <div class="error-item">
+        <span class="error-code">10</span><span>Bluetooth-Kommunikation</span>
+        <div class="error-fix">→ App neu starten, Bluetooth zurücksetzen</div>
       </div>
     </div>
   </div>
@@ -444,373 +692,247 @@
   <div id="page-guide" class="page">
     <div class="page-header">
       <h2>Flash-Anleitung</h2>
-      <p>Schritt-für-Schritt für SHU</p>
+      <p>Schritt-für-Schritt für ScooterHacking Utility</p>
     </div>
     <div class="card">
       <div class="card-title">Vorbereitung</div>
-      <p style="font-size:0.82rem; line-height:1.9; color:var(--text);">
-        1. Segway-App → Scooter <strong>entkoppeln</strong><br>
-        2. SHU v3/v4 installieren: <code style="color:var(--accent);">utility-beta.cfw.sh</code><br>
-        3. VPN aktivieren (außerhalb DE)<br>
-        4. Mit Scooter per Bluetooth verbinden
+      <p style="font-size:0.85rem; line-height:2; color:var(--text);">
+        1. Segway-App öffnen → Scooter <strong>entkoppeln</strong><br>
+        2. SHU v3/v4 installieren: <code style="color:var(--accent-glow);">utility-beta.cfw.sh</code><br>
+        3. VPN aktivieren (Standort außerhalb Deutschlands)<br>
+        4. Mit dem Scooter per Bluetooth verbinden
       </p>
     </div>
     <div class="card">
       <div class="card-title">Flashen</div>
-      <p style="font-size:0.82rem; line-height:1.9; color:var(--text);">
+      <p style="font-size:0.85rem; line-height:2; color:var(--text);">
         1. FLASH → Load from Repo → VCU → flashen<br>
         2. FLASH → Load from Repo → MCU → flashen<br>
-        3. TOOLS → change region → US<br>
-        4. Nach Flash: App → Max-Speed auf 40 km/h
+        3. TOOLS → change region → <strong>US</strong><br>
+        4. Nach Flash: App öffnen → Max-Speed auf <strong>40 km/h</strong>
       </p>
+    </div>
+    <div class="infobox">
+      💡 <strong>Tipp:</strong> Der Panic Button erlaubt sofortigen Wechsel in den StVZO-Modus per Tastendruck.
+      Power-Modus: Gas + Bremse gleichzeitig beim Einschalten.
     </div>
   </div>
 
 </main>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════
-//  MD5 (RFC 1321)
-// ═══════════════════════════════════════════════════════════════════════
-function md5(data) {
-  function safeAdd(x, y) {
-    var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-    var msw = (x >> 16) + (y >> 16)16);
-    return (msw << 16) | (lsw & 0xFFFF);
-  }
-  function bitRotateLeft(num, cnt) { return (num << cnt) | (num >>> (32 - cnt)); }
-  function md5cmn(q, a, b, x, s, t) { return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b); }
-  function md5ff(a, b, c, d, x, s, t) { return md5cmn((b & c) | (~b & d), a, b, x, s, t); }
-  function md5gg(a, b, c, d, x, s, t) { return md5cmn((b & d) | (c & ~d), a, b, x, s, t); }
-  function md5hh(a, b, c, d, x, s, t) { return md5cmn(b ^ c ^ d, a, b, x, s, t); }
-  function md5ii(a, b, c, d, x, s, t) { return md5cmn(c ^ (b | ~d), a, b, x, s, t); }
+// ═══════════════ MD5 ═══════════════
+function md5(data){function safeAdd(x,y){var lsw=(x&0xFFFF)+(y&0xFFFF);var msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&0xFFFF);}function bitRotateLeft(num,cnt){return(num<<cnt)|(num>>>(32-cnt));}function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b);}function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|(~b&d),a,b,x,s,t);}function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&~d),a,b,x,s,t);}function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t);}function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|~d),a,b,x,s,t);}function binlMD5(x,len){x[len>>5]|=0x80<<(len%32);x[(((len+64)>>>9)<<4)+14]=len;var i,olda,oldb,oldc,oldd,a=1732584193,b=-271733879,c=-1732584194,d=271733878;for(i=0;i<x.length;i+=16){olda=a;oldb=b;oldc=c;oldd=d;a=md5ff(a,b,c,d,x[i],7,-680876936);d=md5ff(d,a,b,c,x[i+1],12,-389564586);c=md5ff(c,d,a,b,x[i+2],17,606105819);b=md5ff(b,c,d,a,x[i+3],22,-1044525330);a=md5ff(a,b,c,d,x[i+4],7,-176418897);d=md5ff(d,a,b,c,x[i+5],12,1200080426);c=md5ff(c,d,a,b,x[i+6],17,-1473231341);b=md5ff(b,c,d,a,x[i+7],22,-45705983);a=md5ff(a,b,c,d,x[i+8],7,1770035416);d=md5ff(d,a,b,c,x[i+9],12,-1958414417);c=md5ff(c,d,a,b,x[i+10],17,-42063);b=md5ff(b,c,d,a,x[i+11],22,-1990404162);a=md5ff(a,b,c,d,x[i+12],7,1804603682);d=md5ff(d,a,b,c,x[i+13],12,-40341101);c=md5ff(c,d,a,b,x[i+14],17,-1502002290);b=md5ff(b,c,d,a,x[i+15],22,1236535329);a=md5gg(a,b,c,d,x[i+1],5,-165796510);d=md5gg(d,a,b,c,x[i+6],9,-1069501632);c=md5gg(c,d,a,b,x[i+11],14,643717713);b=md5gg(b,c,d,a,x[i],20,-373897302);a=md5gg(a,b,c,d,x[i+5],5,-701558691);d=md5gg(d,a,b,c,x[i+10],9,38016083);c=md5gg(c,d,a,b,x[i+15],14,-660478335);b=md5gg(b,c,d,a,x[i+4],20,-405537848);a=md5gg(a,b,c,d,x[i+9],5,568446438);d=md5gg(d,a,b,c,x[i+14],9,-1019803690);c=md5gg(c,d,a,b,x[i+3],14,-187363961);b=md5gg(b,c,d,a,x[i+8],20,1163531501);a=md5gg(a,b,c,d,x[i+13],5,-1444681467);d=md5gg(d,a,b,c,x[i+2],9,-51403784);c=md5gg(c,d,a,b,x[i+7],14,1735328473);b=md5gg(b,c,d,a,x[i+12],20,-1926607734);a=md5hh(a,b,c,d,x[i+5],4,-378558);d=md5hh(d,a,b,c,x[i+8],11,-2022574463);c=md5hh(c,d,a,b,x[i+11],16,1839030562);b=md5hh(b,c,d,a,x[i+14],23,-35309556);a=md5hh(a,b,c,d,x[i+1],4,-1530992060);d=md5hh(d,a,b,c,x[i+4],11,1272893353);c=md5hh(c,d,a,b,x[i+7],16,-155497632);b=md5hh(b,c,d,a,x[i+10],23,-1094730640);a=md5hh(a,b,c,d,x[i+13],4,681279174);d=md5hh(d,a,b,c,x[i],11,-358537222);c=md5hh(c,d,a,b,x[i+3],16,-722521979);b=md5hh(b,c,d,a,x[i+6],23,76029189);a=md5hh(a,b,c,d,x[i+9],4,-640364487);d=md5hh(d,a,b,c,x[i+12],11,-421815835);c=md5hh(c,d,a,b,x[i+15],16,530742520);b=md5hh(b,c,d,a,x[i+2],23,-995338651);a=md5ii(a,b,c,d,x[i],6,-198630844);d=md5ii(d,a,b,c,x[i+7],10,1126891415);c=md5ii(c,d,a,b,x[i+14],15,-1416354905);b=md5ii(b,c,d,a,x[i+5],21,-57434055);a=md5ii(a,b,c,d,x[i+12],6,1700485571);d=md5ii(d,a,b,c,x[i+3],10,-1894986606);c=md5ii(c,d,a,b,x[i+10],15,-1051523);b=md5ii(b,c,d,a,x[i+1],21,-2054922799);a=md5ii(a,b,c,d,x[i+8],6,1873313359);d=md5ii(d,a,b,c,x[i+15],10,-30611744);c=md5ii(c,d,a,b,x[i+6],15,-1560198380);b=md5ii(b,c,d,a,x[i+13],21,1309151649);a=md5ii(a,b,c,d,x[i+4],6,-145523070);d=md5ii(d,a,b,c,x[i+11],10,-1120210379);c=md5ii(c,d,a,b,x[i+2],15,718787259);b=md5ii(b,c,d,a,x[i+9],21,-343485551);a=safeAdd(a,olda);b=safeAdd(b,oldb);c=safeAdd(c,oldc);d=safeAdd(d,oldd);}return[a,b,c,d];}function binl2rstr(input){var i,output='';var length32=input.length*32;for(i=0;i<length32;i+=8)output+=String.fromCharCode((input[i>>5]>>>(i%32))&0xFF);return output;}function rstr2binl(input){var i,output=[];output[(input.length>>2)-1]=undefined;for(i=0;i<output.length;i+=1)output[i]=0;var length8=input.length*8;for(i=0;i<length8;i+=8)output[i>>5]|=(input.charCodeAt(i/8)&0xFF)<<(i%32);return output;}function rstrMD5(s){return binl2rstr(binlMD5(rstr2binl(s),s.length*8));}function rstr2hex(input){var hexTab='0123456789abcdef',output='',x,i;for(i=0;i<input.length;i+=1){x=input.charCodeAt(i);output+=hexTab.charAt((x>>>4)&0x0F)+hexTab.charAt(x&0x0F);}return output;}function str2rstrUTF8(input){return unescape(encodeURIComponent(input));}function rawMD5(s){return rstrMD5(str2rstrUTF8(s));}function hexMD5(s){return rstr2hex(rawMD5(s));}var str='';for(var i=0;i<data.length;i++)str+=String.fromCharCode(data[i]);return hexMD5(str);}
 
-  function binlMD5(x, len) {
-    x[len >> 5] |= 0x80 << (len % 32);
-    x[(((len + 64) >>> 9) << 4) + 14] = len;
-    var i, olda, oldb, oldc, oldd,
-        a = 1732584193, b = -271733879, c = -1732584194, d = 271733878;
-    for (i = 0; i < x.length; i += 16) {
-      olda = a; oldb = b; oldc = c; oldd = d;
-      a = md5ff(a, b, c, d, x[i], 7, -680876936); d = md5ff(d, a, b, c, x[i + 1], 12, -389564586); c = md5ff(c, d, a, b, x[i + 2], 17, 606105819); b = md5ff(b, c, d, a, x[i + 3], 22, -1044525330);
-      a = md5ff(a, b, c, d, x[i + 4], 7, -176418897); d = md5ff(d, a, b, c, x[i + 5], 12, 1200080426); c = md5ff(c, d, a, b, x[i + 6], 17, -1473231341); b = md5ff(b, c, d, a, x[i + 7], 22, -45705983);
-      a = md5ff(a, b, c, d, x[i + 8], 7, 1770035416); d = md5ff(d, a, b, c, x[i + 9], 12, -1958414417); c = md5ff(c, d, a, b, x[i + 10], 17, -42063); b = md5ff(b, c, d, a, x[i + 11], 22, -1990404162);
-      a = md5ff(a, b, c, d, x[i + 12], 7, 1804603682); d = md5ff(d, a, b, c, x[i + 13], 12, -40341101); c = md5ff(c, d, a, b, x[i + 14], 17, -1502002290); b = md5ff(b, c, d, a, x[i + 15], 22, 1236535329);
-      a = md5gg(a, b, c, d, x[i + 1], 5, -165796510); d = md5gg(d, a, b, c, x[i + 6], 9, -1069501632); c = md5gg(c, d, a, b, x[i + 11], 14, 643717713); b = md5gg(b, c, d, a, x[i], 20, -373897302);
-      a = md5gg(a, b, c, d, x[i + 5], 5, -701558691); d = md5gg(d, a, b, c, x[i + 10], 9, 38016083); c = md5gg(c, d, a, b, x[i + 15], 14, -660478335); b = md5gg(b, c, d, a, x[i + 4], 20, -405537848);
-      a = md5gg(a, b, c, d, x[i + 9], 5, 568446438); d = md5gg(d, a, b, c, x[i + 14], 9, -1019803690); c = md5gg(c, d, a, b, x[i + 3], 14, -187363961); b = md5gg(b, c, d, a, x[i + 8], 20, 1163531501);
-      a = md5gg(a, b, c, d, x[i + 13], 5, -1444681467); d = md5gg(d, a, b, c, x[i + 2], 9, -51403784); c = md5gg(c, d, a, b, x[i + 7], 14, 1735328473); b = md5gg(b, c, d, a, x[i + 12], 20, -1926607734);
-      a = md5hh(a, b, c, d, x[i + 5], 4, -378558); d = md5hh(d, a, b, c, x[i + 8], 11, -2022574463); c = md5hh(c, d, a, b, x[i + 11], 16, 1839030562); b = md5hh(b, c, d, a, x[i + 14], 23, -35309556);
-      a = md5hh(a, b, c, d, x[i + 1], 4, -1530992060); d = md5hh(d, a, b, c, x[i + 4], 11, 1272893353); c = md5hh(c, d, a, b, x[i + 7], 16, -155497632); b = md5hh(b, c, d, a, x[i + 10], 23, -1094730640);
-      a = md5hh(a, b, c, d, x[i + 13], 4, 681279174); d = md5hh(d, a, b, c, x[i], 11, -358537222); c = md5hh(c, d, a, b, x[i + 3], 16, -722521979); b = md5hh(b, c, d, a, x[i + 6], 23, 76029189);
-      a = md5hh(a, b, c, d, x[i + 9], 4, -640364487); d = md5hh(d, a, b, c, x[i + 12], 11, -421815835); c = md5hh(c, d, a, b, x[i + 15], 16, 530742520); b = md5hh(b, c, d, a, x[i + 2], 23, -995338651);
-      a = md5ii(a, b, c, d, x[i], 6, -198630844); d = md5ii(d, a, b, c, x[i + 7], 10, 1126891415); c = md5ii(c, d, a, b, x[i + 14], 15, -1416354905); b = md5ii(b, c, d, a, x[i + 5], 21, -57434055);
-      a = md5ii(a, b, c, d, x[i + 12], 6, 1700485571); d = md5ii(d, a, b, c, x[i + 3], 10, -1894986606); c = md5ii(c, d, a, b, x[i + 10], 15, -1051523); b = md5ii(b, c, d, a, x[i + 1], 21, -2054922799);
-      a = md5ii(a, b, c, d, x[i + 8], 6, 1873313359); d = md5ii(d, a, b, c, x[i + 15], 10, -30611744); c = md5ii(c, d, a, b, x[i + 6], 15, -1560198380); b = md5ii(b, c, d, a, x[i + 13], 21, 1309151649);
-      a = md5ii(a, b, c, d, x[i + 4], 6, -145523070); d = md5ii(d, a, b, c, x[i + 11], 10, -1120210379); c = md5ii(c, d, a, b, x[i + 2], 15, 718787259); b = md5ii(b, c, d, a, x[i + 9], 21, -343485551);
-      a = safeAdd(a, olda); b = safeAdd(b, oldb); c = safeAdd(c, oldc); d = safeAdd(d, oldd);
-    }
-    return [a, b, c, d];
-  }
-  function binl2rstr(input) {
-    var i, output = '';
-    var length32 = input.length * 32;
-    for (i = 0; i < length32; i += 8) output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xFF);
-    return output;
-  }
-  function rstr2binl(input) {
-    var i, output = [];
-    output[(input.length >> 2) - 1] = undefined;
-    for (i = 0; i < output.length; i += 1) output[i] = 0;
-    var length8 = input.length * 8;
-    for (i = 0; i < length8; i += 8) output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (i % 32);
-    return output;
-  }
-  function rstrMD5(s) { return binl2rstr(binlMD5(rstr2binl(s), s.length * 8)); }
-  function rstr2hex(input) {
-    var hexTab = '0123456789abcdef', output = '', x, i;
-    for (i = 0; i < input.length; i += 1) { x = input.charCodeAt(i); output += hexTab.charAt((x >>> 4) & 0x0F) + hexTab.charAt(x & 0x0F); }
-    return output;
-  }
-  function str2rstrUTF8(input) { return unescape(encodeURIComponent(input)); }
-  function rawMD5(s) { return rstrMD5(str2rstrUTF8(s)); }
-  function hexMD5(s) { return rstr2hex(rawMD5(s)); }
-  var str = '';
-  for (var i = 0; i < data.length; i++) str += String.fromCharCode(data[i]);
-  return hexMD5(str);
+// ═══════════════ TEA / XTEA ═══════════════
+const DELTA=0x9E3779B9;
+class NinebotCrypto{constructor(k,v){this.variant=v;this.rounds=v==='tea'?32:64;this.k=new Uint32Array(4);for(let i=0;i<4;i++)this.k[i]=(k[i*4]|(k[i*4+1]<<8)|(k[i*4+2]<<16)|(k[i*4+3]<<24))>>>0;}
+_teaE(v0,v1){let s=0,k=this.k;for(let i=0;i<this.rounds;i++){s=(s+DELTA)>>>0;v0=(v0+((((v1<<4)+k[0])^(v1+s)^((v1>>5)+k[1]))>>>0))>>>0;v1=(v1+((((v0<<4)+k[2])^(v0+s)^((v0>>5)+k[3]))>>>0))>>>0;}return[v0,v1];}
+_teaD(v0,v1){let s=(DELTA*this.rounds)>>>0,k=this.k;for(let i=0;i<this.rounds;i++){v1=(v1-((((v0<<4)+k[2])^(v0+s)^((v0>>5)+k[3]))>>>0))>>>0;v0=(v0-((((v1<<4)+k[0])^(v1+s)^((v1>>5)+k[1]))>>>0))>>>0;s=(s-DELTA)>>>0;}return[v0,v1];}
+_xteaE(v0,v1){let s=0,k=this.k;for(let i=0;i<this.rounds;i++){v0=(v0+((((v1<<4)^(v1>>>5))+v1)^(s+k[s&3])))>>>0;s=(s+DELTA)>>>0;v1=(v1+((((v0<<4)^(v0>>>5))+v0)^(s+k[(s>>>11)&3])))>>>0;}return[v0,v1];}
+_xteaD(v0,v1){let s=(DELTA*this.rounds)>>>0,k=this.k;for(let i=0;i<this.rounds;i++){v1=(v1-((((v0<<4)^(v0>>>5))+v0)^(s+k[(s>>>11)&3])))>>>0;s=(s-DELTA)>>>0;v0=(v0-((((v1<<4)^(v1>>>5))+v1)^(s+k[s&3])))>>>0;}return[v0,v1];}
+process(d,e){const p=(8-(d.length%8))%8,s=new Uint8Array(d.length+p);s.set(d);const o=new Uint8Array(s.length);let pr=new Uint8Array(8);
+for(let i=0;i<s.length;i+=8){const b=s.slice(i,i+8);if(e){let v0=b[0]|(b[1]<<8)|(b[2]<<16)|(b[3]<<24),v1=b[4]|(b[5]<<8)|(b[6]<<16)|(b[7]<<24);v0=(v0^(pr[0]|(pr[1]<<8)|(pr[2]<<16)|(pr[3]<<24)))>>>0;v1=(v1^(pr[4]|(pr[5]<<8)|(pr[6]<<16)|(pr[7]<<24)))>>>0;[v0,v1]=this.variant==='tea'?this._teaE(v0,v1):this._xteaE(v0,v1);const r=new Uint8Array([v0&255,(v0>>>8)&255,(v0>>>16)&255,(v0>>>24)&255,v1&255,(v1>>>8)&255,(v1>>>16)&255,(v1>>>24)&255]);o.set(r,i);pr=r;}
+else{let v0=b[0]|(b[1]<<8)|(b[2]<<16)|(b[3]<<24),v1=b[4]|(b[5]<<8)|(b[6]<<16)|(b[7]<<24);[v0,v1]=this.variant==='tea'?this._teaD(v0,v1):this._xteaD(v0,v1);v0=(v0^(pr[0]|(pr[1]<<8)|(pr[2]<<16)|(pr[3]<<24)))>>>0;v1=(v1^(pr[4]|(pr[5]<<8)|(pr[6]<<16)|(pr[7]<<24)))>>>0;o.set(new Uint8Array([v0&255,(v0>>>8)&255,(v0>>>16)&255,(v0>>>24)&255,v1&255,(v1>>>8)&255,(v1>>>16)&255,(v1>>>24)&255]),i);pr=b;}}
+return o;}
+encrypt(d){return this.process(d,true);}decrypt(d){return this.process(d,false);}}
+
+// ═══════════════ CRC32 & ZIP ═══════════════
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function crc32(d){let c=0xFFFFFFFF;for(let i=0;i<d.length;i++)c=CRC_T[(c^d[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+function createZip(files){const enc=new TextEncoder(),parts=[],central=[];let offset=0;
+for(const[name,data]of files){const nb=enc.encode(name),crc=crc32(data),sz=data.length;
+const lh=new Uint8Array(30+nb.length),lv=new DataView(lh.buffer);
+lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0,true);lv.setUint16(8,0,true);lv.setUint32(14,crc,true);lv.setUint32(18,sz,true);lv.setUint32(22,sz,true);lv.setUint16(26,nb.length,true);lh.set(nb,30);parts.push(lh,data);
+const ch=new Uint8Array(46+nb.length),cv=new DataView(ch.buffer);
+cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint32(16,crc,true);cv.setUint32(20,sz,true);cv.setUint32(24,sz,true);cv.setUint16(28,nb.length,true);cv.setUint32(42,offset,true);ch.set(nb,46);central.push(ch);
+offset+=lh.length+sz;}
+const cs=central.reduce((a,c)=>a+c.length,0),eocd=new Uint8Array(22),ev=new DataView(eocd.buffer);
+ev.setUint32(0,0x06054b50,true);ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);ev.setUint32(12,cs,true);ev.setUint32(16,offset,true);
+const all=[...parts,...central,eocd],total=all.reduce((a,p)=>a+p.length,0),res=new Uint8Array(total);let pos=0;
+for(const p of all){res.set(p,pos);pos+=p.length;}return res;}
+
+// ═══════════════ PATCH-ENGINE ═══════════════
+const SN=[0x31,0x4B,0x31],SP=[0x05,0x0F,0x16];
+function findB(d,p,s=0){o:for(let i=s;i<=d.length-p.length;i++){for(let j=0;j<p.length;j++)if(d[i+j]!==p[j])continue o;return i;}return -1;}
+
+function patchVCU(data,opts,log){
+data=new Uint8Array(data);
+const si=findB(data,SN);
+if(si>=0){const o=si+3,b=String.fromCharCode(data[o]);data[o]=opts.region.charCodeAt(0);log(`  ✓ Region ${b} → ${opts.region} @ 0x${o.toString(16).padStart(4,'0')}`);if(opts.region==='U')log(`  ✓ Panic Button aktiviert (Region U)`);}
+else log('  ✗ SN-Marker nicht gefunden','err');
+let spi=findB(data,SP);
+if(spi<0){for(const a of[[0x05,0x0F,0x19],[0x05,0x0F,0x14],[0x05,0x0F,0x1E]]){spi=findB(data,a);if(spi>=0)break;}}
+if(spi>=0){data[spi]=0x05;data[spi+1]=0x0F;data[spi+2]=opts.speed&0xFF;log(`  ✓ Speed → ${opts.speed} km/h @ 0x${spi.toString(16).padStart(4,'0')}`);if(opts.speed>60)log(`  ⚠ >60 km/h = nur Leerlauf-Wert!`,'warn');}
+else log('  ✗ Speed-Sequenz nicht gefunden','err');
+const base=spi>=0?spi:0;
+if(opts.powerMode){const o=base+2;if(o<data.length){data[o]=0x01;log(`  ✓ Power-Modus @ 0x${o.toString(16).padStart(4,'0')}`);}}
+if(opts.cruise){const o=base+4;if(o<data.length){data[o]=0x01;log(`  ✓ Tempomat @ 0x${o.toString(16).padStart(4,'0')}`);}}
+if(opts.zeroStart){const o=base+8;if(o<data.length){data[o]=0x01;log(`  ✓ Zero Start @ 0x${o.toString(16).padStart(4,'0')}`);}}
+if(opts.panic){const o=base+12;if(o<data.length){data[o]=0x01;log(`  ✓ Panic Button @ 0x${o.toString(16).padStart(4,'0')}`);}}
+if(opts.kers){const m={off:0,weak:1,strong:2};const o=base+16;if(o<data.length){data[o]=m[opts.kers];log(`  ✓ KERS → ${opts.kers} @ 0x${o.toString(16).padStart(4,'0')}`);}}
+if(opts.lighting){const m={always_on:1,always_off:0,brake_only:2};const o=base+20;if(o<data.length){data[o]=m[opts.lighting];log(`  ✓ Beleuchtung → ${opts.lighting} @ 0x${o.toString(16).padStart(4,'0')}`);}}
+if(opts.beeper==='off'){const o=base+24;if(o<data.length){data[o]=0x00;log(`  ✓ Piepton aus @ 0x${o.toString(16).padStart(4,'0')}`);}}
+return data;
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-//  TEA / XTEA
-// ═══════════════════════════════════════════════════════════════════════
-const DELTA = 0x9E3779B9;
-class NinebotCrypto {
-  constructor(k, v) { this.variant = v; this.rounds = v === 'tea' ? 32 : 64;
-    this.k = new Uint32Array(4);
-    for (let i = 0; i < 4; i++) this.k[i] = (k[i*4] | (k[i*4+1]<<8) | (k[i*4+2]<<16) | (k[i*4+3]<<24)) >>> 0; }
-  _teaE(v0,v1){let s=0,k=this.k;for(let i=0;i<this.rounds;i++){s=(s+DELTA)>>>0;v0=(v0+((((v1<<4)+k[0])^(v1+s)^((v1>>5)+k[1]))>>>0))>>>0;v1=(v1+((((v0<<4)+k[2])^(v0+s)^((v0>>5)+k[3]))>>>0))>>>0;}return[v0,v1];}
-  _teaD(v0,v1){let s=(DELTA*this.rounds)>>>0,k=this.k;for(let i=0;i<this.rounds;i++){v1=(v1-((((v0<<4)+k[2])^(v0+s)^((v0>>5)+k[3]))>>>0))>>>0;v0=(v0-((((v1<<4)+k[0])^(v1+s)^((v1>>5)+k[1]))>>>0))>>>0;s=(s-DELTA)>>>0;}return[v0,v1];}
-  _xteaE(v0,v1){let s=0,k=this.k;for(let i=0;i<this.rounds;i++){v0=(v0+((((v1<<4)^(v1>>>5))+v1)^(s+k[s&3])))>>>0;s=(s+DELTA)>>>0;v1=(v1+((((v0<<4)^(v0>>>5))+v0)^(s+k[(s>>>11)&3])))>>>0;}return[v0,v1];}
-  _xteaD(v0,v1){let s=(DELTA*this.rounds)>>>0,k=this.k;for(let i=0;i<this.rounds;i++){v1=(v1-((((v0<<4)^(v0>>>5))+v0)^(s+k[(s>>>11)&3])))>>>0;s=(s-DELTA)>>>0;v0=(v0-((((v1<<4)^(v1>>>5))+v1)^(s+k[s&3])))>>>0;}return[v0,v1];}
-  process(d, e) { const p = (8 - (d.length % 8)) % 8, s = new Uint8Array(d.length + p); s.set(d);
-    const o = new Uint8Array(s.length); let pr = new Uint8Array(8);
-    for (let i = 0; i < s.length; i += 8) { const b = s.slice(i, i+8);
-      if (e) { let v0 = b[0]|(b[1]<<8)|(b[2]<<16)|(b[3]<<24), v1 = b[4]|(b[5]<<8)|(b[6]<<16)|(b[7]<<24);
-        v0 = (v0 ^ (pr[0]|(pr[1]<<8)|(pr[2]<<16)|(pr[3]<<24))) >>> 0;
-        v1 = (v1 ^ (pr[4]|(pr[5]<<8)|(pr[6]<<16)|(pr[7]<<24))) >>> 0;
-        [v0, v1] = this.variant === 'tea' ? this._teaE(v0,v1) : this._xteaE(v0,v1);
-        const r = new Uint8Array([v0&255,(v0>>>8)&255,(v0>>>16)&255,(v0>>>24)&255,v1&255,(v1>>>8)&255,(v1>>>16)&255,(v1>>>24)&255]);
-        o.set(r, i); pr = r; }
-      else { let v0 = b[0]|(b[1]<<8)|(b[2]<<16)|(b[3]<<24), v1 = b[4]|(b[5]<<8)|(b[6]<<16)|(b[7]<<24);
-        [v0, v1] = this.variant === 'tea' ? this._teaD(v0,v1) : this._xteaD(v0,v1);
-        v0 = (v0 ^ (pr[0]|(pr[1]<<8)|(pr[2]<<16)|(pr[3]<<24))) >>> 0;
-        v1 = (v1 ^ (pr[4]|(pr[5]<<8)|(pr[6]<<16)|(pr[7]<<24))) >>> 0;
-        o.set(new Uint8Array([v0&255,(v0>>>8)&255,(v0>>>16)&255,(v0>>>24)&255,v1&255,(v1>>>8)&255,(v1>>>16)&255,(v1>>>24)&255]), i);
-        pr = b; } }
-    return o; }
-  encrypt(d) { return this.process(d, true); }
-  decrypt(d) { return this.process(d, false); }
-}
+// ═══════════════ UI ═══════════════
+const $=id=>document.getElementById(id);
+let vcuFw=null,region='U';
 
-// ═══════════════════════════════════════════════════════════════════════
-//  CRC32 & ZIP
-// ═══════════════════════════════════════════════════════════════════════
-const CRC_T = (() => { const t = new Uint32Array(256);
-  for (let n = 0; n < 256; n++) { let c = n;
-    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-    t[n] = c >>> 0; } return t; })();
-function crc32(d) { let c = 0xFFFFFFFF;
-  for (let i = 0; i < d.length; i++) c = CRC_T[(c ^ d[i]) & 0xFF] ^ (c >>> 8);
-  return (c ^ 0xFFFFFFFF) >>> 0; }
-
-function createZip(files) {
-  const enc = new TextEncoder(), parts = [], central = [];
-  let offset = 0;
-  for (const [name, data] of files) {
-    const nb = enc.encode(name), crc = crc32(data), sz = data.length;
-    const lh = new Uint8Array(30 + nb.length);
-    const lv = new DataView(lh.buffer);
-    lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true);
-    lv.setUint16(6, 0, true); lv.setUint16(8, 0, true);
-    lv.setUint32(14, crc, true); lv.setUint32(18, sz, true);
-    lv.setUint32(22, sz, true); lv.setUint16(26, nb.length, true);
-    lh.set(nb, 30); parts.push(lh, data);
-    const ch = new Uint8Array(46 + nb.length);
-    const cv = new DataView(ch.buffer);
-    cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true);
-    cv.setUint16(6, 20, true); cv.setUint32(16, crc, true);
-    cv.setUint32(20, sz, true); cv.setUint32(24, sz, true);
-    cv.setUint16(28, nb.length, true); cv.setUint32(42, offset, true);
-    ch.set(nb, 46); central.push(ch);
-    offset += lh.length + sz;
+function toggleSidebar(){
+  const sb=$('sidebar'),btn=$('toggleBtn'),ov=$('overlay');
+  sb.classList.toggle('collapsed');
+  btn.classList.toggle('active');
+  ov.classList.toggle('active');
+  // Toggle-Button wandert mit
+  if(sb.classList.contains('collapsed')){
+    btn.style.left='20px';
+  } else {
+    btn.style.left='calc(var(--sidebar-w) + 20px)';
   }
-  const cs = central.reduce((a, c) => a + c.length, 0);
-  const eocd = new Uint8Array(22);
-  const ev = new DataView(eocd.buffer);
-  ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, files.length, true);
-  ev.setUint16(10, files.length, true); ev.setUint32(12, cs, true);
-  ev.setUint32(16, offset, true);
-  const all = [...parts, ...central, eocd];
-  const total = all.reduce((a, p) => a + p.length, 0);
-  const res = new Uint8Array(total); let pos = 0;
-  for (const p of all) { res.set(p, pos); pos += p.length; }
-  return res;
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-//  PATCH-ENGINE
-// ═══════════════════════════════════════════════════════════════════════
-const SN = [0x31,0x4B,0x31], SP = [0x05,0x0F,0x16];
-function findB(d, p, s = 0) { o: for (let i = s; i <= d.length - p.length; i++) {
-  for (let j = 0; j < p.length; j++) if (d[i+j] !== p[j]) continue o; return i; } return -1; }
-
-function patchVCU(data, opts, log) {
-  data = new Uint8Array(data);
-  const si = findB(data, SN);
-  if (si >= 0) { const o = si + 3, b = String.fromCharCode(data[o]);
-    data[o] = opts.region.charCodeAt(0);
-    log(`  ✓ Region ${b} → ${opts.region} @ 0x${o.toString(16).padStart(4,'0')}`);
-    if (opts.region === 'U') log(`  ✓ Panic Button aktiviert (Region U)`); }
-  else log('  ✗ SN-Marker nicht gefunden');
-
-  let spi = findB(data, SP);
-  if (spi < 0) { for (const a of [[0x05,0x0F,0x19],[0x05,0x0F,0x14],[0x05,0x0F,0x1E]]) {
-    spi = findB(data, a); if (spi >= 0) break; } }
-  if (spi >= 0) { data[spi] = 0x05; data[spi+1] = 0x0F; data[spi+2] = opts.speed & 0xFF;
-    log(`  ✓ Speed → ${opts.speed} km/h @ 0x${spi.toString(16).padStart(4,'0')}`);
-    if (opts.speed > 60) log(`  ⚠ >60 km/h = nur Leerlauf-Wert!`); }
-  else log('  ✗ Speed-Sequenz nicht gefunden');
-
-  const base = spi >= 0 ? spi : 0;
-  if (opts.powerMode) { const o = base+2; if (o < data.length) { data[o] = 0x01; log(`  ✓ Power-Modus @ 0x${o.toString(16).padStart(4,'0')}`); } }
-  if (opts.cruise) { const o = base+4; if (o < data.length) { data[o] = 0x01; log(`  ✓ Tempomat @ 0x${o.toString(16).padStart(4,'0')}`); } }
-  if (opts.zeroStart) { const o = base+8; if (o < data.length) { data[o] = 0x01; log(`  ✓ Zero Start @ 0x${o.toString(16).padStart(4,'0')}`); } }
-  if (opts.panic) { const o = base+12; if (o < data.length) { data[o] = 0x01; log(`  ✓ Panic Button @ 0x${o.toString(16).padStart(4,'0')}`); } }
-  if (opts.kers) { const m = { off:0, weak:1, strong:2 }; const o = base+16; if (o < data.length) { data[o] = m[opts.kers]; log(`  ✓ KERS → ${opts.kers} @ 0x${o.toString(16).padStart(4,'0')}`); } }
-  if (opts.lighting) { const m = { always_on:1, always_off:0, brake_only:2 }; const o = base+20; if (o < data.length) { data[o] = m[opts.lighting]; log(`  ✓ Beleuchtung → ${opts.lighting} @ 0x${o.toString(16).padStart(4,'0')}`); } }
-  if (opts.beeper === 'off') { const o = base+24; if (o < data.length) { data[o] = 0x00; log(`  ✓ Piepton aus @ 0x${o.toString(16).padStart(4,'0')}`); } }
-  return data;
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-//  UI
-// ═══════════════════════════════════════════════════════════════════════
-const $ = id => document.getElementById(id);
-let vcuFw = null, region = 'U';
-
-function log(m, cls) {
-  const el = $('log');
-  const span = document.createElement('span');
-  if (cls) span.className = cls;
-  span.textContent = '\n' + m;
+function log(m,cls){
+  const el=$('log');
+  const span=document.createElement('span');
+  if(cls)span.className=cls;
+  span.textContent='\n'+m;
   el.appendChild(span);
-  el.scrollTop = el.scrollHeight;
+  el.scrollTop=el.scrollHeight;
 }
-function resetLog(m) { $('log').textContent = m; }
-function nav(page, el) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+function resetLog(m){$('log').textContent=m;}
+
+function nav(page,el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   el.classList.add('active');
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  $('page-' + page).classList.add('active');
-  if (page === 'dashboard') updatePreview();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+page).classList.add('active');
+  if(page==='dashboard')updatePreview();
+  // Auto-close auf mobile
+  if(window.innerWidth<800)toggleSidebar();
 }
-function setSpeed(v) { $('speedSlider').value = v; $('speedVal').textContent = v; updateStatus(); }
-function pickRegion(r, el) {
-  region = r;
-  document.querySelectorAll('.region-card').forEach(c => c.classList.remove('active'));
+
+function setSpeed(v){$('speedSlider').value=v;$('speedVal').textContent=v;updateStatus();}
+
+function pickRegion(r,el){
+  region=r;
+  document.querySelectorAll('.region-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
-  const p = $('panic');
-  if (r === 'U') { p.disabled = false; p.checked = true; p.parentElement.style.opacity = '1'; }
-  else { p.checked = false; p.disabled = true; p.parentElement.style.opacity = '0.4'; }
+  const p=$('panic');
+  if(r==='U'){p.disabled=false;p.checked=true;p.parentElement.style.opacity='1';}
+  else{p.checked=false;p.disabled=true;p.parentElement.style.opacity='0.4';}
   updateStatus();
 }
-function updateStatus() {
-  $('chipVcu').className = 'chip' + (vcuFw ? ' on' : '');
-  $('chipVcu').textContent = 'VCU: ' + (vcuFw ? vcuFw.length + ' B' : '—');
-  $('chipKey').className = 'chip' + ($('key').value.trim() ? ' on' : '');
-  $('chipKey').textContent = 'Key: ' + ($('key').value.trim() ? '✓' : 'auto');
-  $('chipSpeed').className = 'chip on';
-  $('chipSpeed').textContent = 'Speed: ' + $('speedSlider').value + ' km/h';
-  $('buildBtn').disabled = !vcuFw;
-  $('revertBtn').disabled = !vcuFw;
-}
-function updatePreview() {
-  const rn = { U:'USA (U)', E:'Europa (E)', D:'Deutschland (D)', Z:'Asien (Z)' };
-  $('pvRegion').textContent = rn[region] || region;
-  $('pvSpeed').textContent = $('speedSlider').value + ' km/h';
-  $('pvPanic').textContent = $('panic').checked ? '✅ AN' : '— AUS';
-  $('pvPower').textContent = $('powerMode').checked ? '✅ AN' : '— AUS';
-  $('pvCruise').textContent = $('cruise').checked ? '✅ AN' : '— AUS';
-  $('pvZero').textContent = $('zeroStart').checked ? '✅ AN' : '— AUS';
-  $('pvKers').textContent = $('kers').value || 'Stock';
-  $('pvLight').textContent = $('lighting').value || 'Stock';
+
+function updateStatus(){
+  $('chipVcu').className='chip'+(vcuFw?' on':'');
+  $('chipVcu').textContent='VCU: '+(vcuFw?vcuFw.length+' B':'—');
+  $('chipKey').className='chip'+($('key').value.trim()?' on':'');
+  $('chipKey').textContent='Key: '+($('key').value.trim()?'✓':'auto');
+  $('chipSpeed').className='chip on';
+  $('chipSpeed').textContent='Speed: '+$('speedSlider').value+' km/h';
+  $('buildBtn').disabled=!vcuFw;
+  $('revertBtn').disabled=!vcuFw;
 }
 
-async function loadFw(file) {
-  const buf = await file.arrayBuffer();
-  if (file.name.endsWith('.zip')) { const b = new Uint8Array(buf);
-    for (let i = 0; i < b.length - 30; i++) { if (b[i] === 0x50 && b[i+1] === 0x4B && b[i+2] === 0x03 && b[i+3] === 0x04) {
-      const nl = b[i+26] | (b[i+27] << 8), nm = new TextDecoder().decode(b.slice(i+30, i+30+nl));
-      const cs = b[i+18] | (b[i+19] << 8) | (b[i+20] << 16) | (b[i+21] << 24);
-      if (nm === 'FIRM.bin.enc' || nm === 'FIRM.bin') return b.slice(i+30+nl, i+30+nl+cs); } }
-    return null; }
+function updatePreview(){
+  const rn={U:'USA (U)',E:'Europa (E)',D:'Deutschland (D)',Z:'Asien (Z)'};
+  $('pvRegion').textContent=rn[region]||region;
+  $('pvSpeed').textContent=$('speedSlider').value+' km/h';
+  $('pvPanic').textContent=$('panic').checked?'✅ AN':'— AUS';
+  $('pvPanic').className=$('panic').checked?'val-on':'val-off';
+  $('pvPower').textContent=$('powerMode').checked?'✅ AN':'— AUS';
+  $('pvPower').className=$('powerMode').checked?'val-on':'val-off';
+  $('pvCruise').textContent=$('cruise').checked?'✅ AN':'— AUS';
+  $('pvCruise').className=$('cruise').checked?'val-on':'val-off';
+  $('pvZero').textContent=$('zeroStart').checked?'✅ AN':'— AUS';
+  $('pvZero').className=$('zeroStart').checked?'val-on':'val-off';
+  $('pvKers').textContent=$('kers').value||'Stock';
+  $('pvLight').textContent=$('lighting').value||'Stock';
+  $('pvBeeper').textContent=$('beeper').value||'Stock';
+}
+
+async function loadFw(file){
+  const buf=await file.arrayBuffer();
+  if(file.name.endsWith('.zip')){
+    const b=new Uint8Array(buf);
+    for(let i=0;i<b.length-30;i++){
+      if(b[i]===0x50&&b[i+1]===0x4B&&b[i+2]===0x03&&b[i+3]===0x04){
+        const nl=b[i+26]|(b[i+27]<<8),nm=new TextDecoder().decode(b.slice(i+30,i+30+nl));
+        const cs=b[i+18]|(b[i+19]<<8)|(b[i+20]<<16)|(b[i+21]<<24);
+        if(nm==='FIRM.bin.enc'||nm==='FIRM.bin')return b.slice(i+30+nl,i+30+nl+cs);
+      }
+    }
+    return null;
+  }
   return new Uint8Array(buf);
 }
 
-$('vcuFile').addEventListener('change', async e => {
-  const f = e.target.files[0]; if (!f) return;
-  const d = await loadFw(f);
-  if (d) { vcuFw = d; $('vcuInfo').classList.remove('hidden'); $('vcuName').textContent = d.length + ' Bytes';
-    updateStatus(); log('✓ VCU geladen (' + d.length + ' B)'); }
-  else log('✗ VCU FIRM.bin nicht gefunden', 'err');
+$('vcuFile').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  const d=await loadFw(f);
+  if(d){
+    vcuFw=d;
+    $('vcuInfo').classList.remove('hidden');
+    $('vcuName').textContent=d.length+' Bytes';
+    updateStatus();
+    log('✓ VCU geladen ('+d.length+' B)');
+  } else log('✗ VCU FIRM.bin nicht gefunden','err');
 });
 
-$('buildBtn').addEventListener('click', () => {
-  resetLog('Baue Firmware...'); log('');
-  let keyHex = $('key').value.trim();
-  const encMode = $('encMode').value, variant = $('variant').value;
-
-  if (!vcuFw) { log('✗ Keine VCU-Firmware geladen', 'err'); return; }
-
-  log('═══ VCU ═══', 'info');
-  const opts = { region, speed: parseInt($('speedSlider').value), powerMode: $('powerMode').checked,
-    cruise: $('cruise').checked, zeroStart: $('zeroStart').checked, panic: $('panic').checked,
-    kers: $('kers').value || null, lighting: $('lighting').value || null, beeper: $('beeper').value };
-
-  const patched = patchVCU(vcuFw, opts, log);
-
-  if (!keyHex && patched.length >= 0x1430) {
-    const k = patched.slice(0x1420, 0x1430);
-    keyHex = Array.from(k).map(b => b.toString(16).padStart(2, '0')).join('');
-    log('  ✓ Key aus 0x1420: ' + keyHex, 'info');
+$('buildBtn').addEventListener('click',()=>{
+  resetLog('Baue Firmware...');log('');
+  let keyHex=$('key').value.trim();
+  const encMode=$('encMode').value,variant=$('variant').value;
+  if(!vcuFw){log('✗ Keine VCU-Firmware geladen','err');return;}
+  log('═══ VCU ═══','info');
+  const opts={region,speed:parseInt($('speedSlider').value),powerMode:$('powerMode').checked,cruise:$('cruise').checked,zeroStart:$('zeroStart').checked,panic:$('panic').checked,kers:$('kers').value||null,lighting:$('lighting').value||null,beeper:$('beeper').value};
+  const patched=patchVCU(vcuFw,opts,log);
+  if(!keyHex&&patched.length>=0x1430){
+    const k=patched.slice(0x1420,0x1430);
+    keyHex=Array.from(k).map(b=>b.toString(16).padStart(2,'0')).join('');
+    log('  ✓ Key aus 0x1420: '+keyHex,'info');
   }
-  if (!keyHex) { log('  ✗ Key fehlt', 'err'); return; }
-
-  const kb = new Uint8Array(keyHex.match(/.{2}/g).map(h => parseInt(h, 16)));
-  if (kb.length !== 16) { log('  ✗ Key muss 16 Bytes sein', 'err'); return; }
-
-  const crypto = new NinebotCrypto(kb, variant);
-  const enc = crypto.encrypt(patched);
-  const files = [];
-  if (encMode === 'both' || encMode === 'plain') files.push(['FIRM.bin', patched]);
-  if (encMode === 'both' || encMode === 'encrypted') files.push(['FIRM.bin.enc', enc]);
-
-  // MD5-Berechnung
-  const md5Bin = md5(patched);
-  const md5Enc = md5(enc);
-  log(`  ✓ MD5 (bin): ${md5Bin}`, 'info');
-  log(`  ✓ MD5 (enc): ${md5Enc}`, 'info');
-
-  const info = {
-    schemaVersion: 1,
-    firmware: {
-      displayName: `ZT3 Pro VCU CFW — ${region} — ${opts.speed} km/h`,
-      model: 'zt3', enforceModel: true, type: 'VCU',
-      compatible: ['zt3_VCU_AT32F415'],
-      encryption: encMode,
-      md5: { bin: md5Bin, enc: md5Enc }
-    }
-  };
-  files.push(['info.json', new TextEncoder().encode(JSON.stringify(info, null, 2))]);
-  files.push(['params.txt', new TextEncoder().encode(
-    `Region: ${region}\nSpeed: ${opts.speed}\nPanic: ${opts.panic}\nPower: ${opts.powerMode}\n` +
-    `Cruise: ${opts.cruise}\nZeroStart: ${opts.zeroStart}\nKERS: ${opts.kers || 'stock'}\n` +
-    `Lighting: ${opts.lighting || 'stock'}\nBeeper: ${opts.beeper}\n`
-  )]);
-
-  const zip = createZip(files);
-  const blob = new Blob([zip], { type: 'application/zip' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `ZT3_VCU_CFW_${region}_${opts.speed}kmh.zip`;
-  a.click(); URL.revokeObjectURL(url);
-
-  log(`\n✓ ZIPv3 erstellt (${zip.length} B)`, 'info');
-  log('→ SHU → FLASH → Load from File', 'info');
+  if(!keyHex){log('  ✗ Key fehlt','err');return;}
+  const kb=new Uint8Array(keyHex.match(/.{2}/g).map(h=>parseInt(h,16)));
+  if(kb.length!==16){log('  ✗ Key muss 16 Bytes sein','err');return;}
+  const crypto=new NinebotCrypto(kb,variant);
+  const enc=crypto.encrypt(patched);
+  const files=[];
+  if(encMode==='both'||encMode==='plain')files.push(['FIRM.bin',patched]);
+  if(encMode==='both'||encMode==='encrypted')files.push(['FIRM.bin.enc',enc]);
+  const md5Bin=md5(patched),md5Enc=md5(enc);
+  log(`  ✓ MD5 (bin): ${md5Bin}`,'info');
+  log(`  ✓ MD5 (enc): ${md5Enc}`,'info');
+  const info={schemaVersion:1,firmware:{displayName:`ZT3 Pro VCU CFW — ${region} — ${opts.speed} km/h`,model:'zt3',enforceModel:true,type:'VCU',compatible:['zt3_VCU_AT32F415'],encryption:encMode,md5:{bin:md5Bin,enc:md5Enc}}};
+  files.push(['info.json',new TextEncoder().encode(JSON.stringify(info,null,2))]);
+  files.push(['params.txt',new TextEncoder().encode(`Region: ${region}\nSpeed: ${opts.speed}\nPanic: ${opts.panic}\nPower: ${opts.powerMode}\nCruise: ${opts.cruise}\nZeroStart: ${opts.zeroStart}\nKERS: ${opts.kers||'stock'}\nLighting: ${opts.lighting||'stock'}\nBeeper: ${opts.beeper}\n`)]);
+  const zip=createZip(files),blob=new Blob([zip],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`ZT3_VCU_CFW_${region}_${opts.speed}kmh.zip`;a.click();URL.revokeObjectURL(url);
+  log(`\n✓ ZIPv3 erstellt (${zip.length} B)`,'info');
+  log('→ SHU → FLASH → Load from File','info');
 });
 
-$('revertBtn').addEventListener('click', () => {
-  if (!vcuFw) { log('✗ Keine Firmware geladen', 'err'); return; }
-  const files = [];
-  files.push(['FIRM.bin', vcuFw]);
-  const md5Bin = md5(vcuFw);
-  const info = { schemaVersion: 1, firmware: { displayName: 'ZT3 Pro Stock', model: 'zt3',
-    enforceModel: true, type: 'VCU', compatible: ['zt3_VCU_AT32F415'],
-    encryption: 'plain', md5: { bin: md5Bin } } };
-  files.push(['info.json', new TextEncoder().encode(JSON.stringify(info, null, 2))]);
-  const zip = createZip(files);
-  const blob = new Blob([zip], { type: 'application/zip' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'ZT3_Stock_Revert.zip';
-  a.click(); URL.revokeObjectURL(url);
+$('revertBtn').addEventListener('click',()=>{
+  if(!vcuFw){log('✗ Keine Firmware geladen','err');return;}
+  const files=[['FIRM.bin',vcuFw]];
+  const md5Bin=md5(vcuFw);
+  const info={schemaVersion:1,firmware:{displayName:'ZT3 Pro Stock',model:'zt3',enforceModel:true,type:'VCU',compatible:['zt3_VCU_AT32F415'],encryption:'plain',md5:{bin:md5Bin}}};
+  files.push(['info.json',new TextEncoder().encode(JSON.stringify(info,null,2))]);
+  const zip=createZip(files),blob=new Blob([zip],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='ZT3_Stock_Revert.zip';a.click();URL.revokeObjectURL(url);
   log('✓ Stock-ZIP erstellt');
 });
 
-['kers','lighting','beeper'].forEach(id => $(id).addEventListener('change', updatePreview));
-['cruise','zeroStart','powerMode'].forEach(id => $(id).addEventListener('change', updatePreview));
-$('key').addEventListener('input', updateStatus);
+['kers','lighting','beeper'].forEach(id=>$(id).addEventListener('change',updatePreview));
+['cruise','zeroStart','powerMode'].forEach(id=>$(id).addEventListener('change',updatePreview));
+$('key').addEventListener('input',updateStatus);
 
-updateStatus(); updatePreview(); resetLog('Bereit.');
+// Init
+updateStatus();updatePreview();resetLog('Bereit. Lade eine VCU-Firmware.');
+// Sidebar startet offen → Button positioniert sich
+setTimeout(()=>{document.getElementById('toggleBtn').style.left='calc(var(--sidebar-w) + 20px)';},100);
 </script>
 </body>
 </html>
