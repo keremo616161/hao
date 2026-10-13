@@ -1154,7 +1154,7 @@
           <h3>⚡ Ultimate Firmware Builder</h3>
           <p>Erstelle Custom Firmware für die Ninebot X3-Serie mit vollständiger Modul-Unterstützung, individuellem Unlock-Code und ZIPv3-konformem Output.</p>
           <div style="margin-top:12px;">
-            <span class="badge purple">v13.0</span>
+            <span class="badge purple">v14.0</span>
             <span class="badge green">ZIPv3</span>
             <span class="badge">MD5</span>
             <span class="badge">XTEA</span>
@@ -1219,7 +1219,7 @@
 <div class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <h1>X3</h1>
-    <p>Builder v13</p>
+    <p>Builder v14</p>
   </div>
   <div class="sidebar-item active" onclick="sidebarNav('builder', this)">
     <span class="icon">🔧</span><span>Firmware bauen</span>
@@ -1308,7 +1308,7 @@ function patchVCU(data,opts,log){
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  ROLLER → ZIPv3 IDENTIFIERS (KORRIGIERT)
+//  ROLLER → ZIPv3 IDENTIFIERS
 // ═══════════════════════════════════════════════════════════════════════
 const ROLLER_IDS = {
   g3:  { model: 'max', compatible: ['max_DRV_AT32F415CxT7'] },
@@ -1459,7 +1459,7 @@ function closeModal() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  BUILD – KORRIGIERTE VERSION
+//  BUILD – KORRIGIERTE VERSION (type: 'VCU')
 // ═══════════════════════════════════════════════════════════════════════
 function buildFirmware() {
   resetLog(`⚡ Baue Firmware für ${state.roller.toUpperCase()} (${state.module.toUpperCase()})...`);
@@ -1504,7 +1504,7 @@ function buildFirmware() {
       displayName: `X3 ${state.roller.toUpperCase()} CFW — ${state.module.toUpperCase()}`,
       model: rollerIds.model,
       enforceModel: true,
-      type: 'DRV',
+      type: 'VCU',
       compatible: rollerIds.compatible,
       encryption: $('encModeSelect').value,
       md5: {
@@ -1515,7 +1515,7 @@ function buildFirmware() {
   };
 
   log('═══ ZIPv3-Identifiers ═══', 'info');
-  log(`  type:         DRV`);
+  log(`  type:         VCU`);
   log(`  model:        ${rollerIds.model}`);
   log(`  compatible:   ${rollerIds.compatible.join(', ')}`);
   log(`  md5 (bin):    ${md5Bin}`);
@@ -1532,7 +1532,7 @@ Speed-Tuning:   Eco=${speedTun.eco} Drive=${speedTun.drive} Sport=${speedTun.spo
 Unlock-Code:    ${code || 'default'}
 Panic-Hold:     ${panicHold}
 Standard-Combo: ${defaultCombo}
-Type:           DRV
+Type:           VCU
 Model:          ${rollerIds.model}
 Compatible:     ${rollerIds.compatible.join(', ')}
 MD5 (bin):      ${md5Bin}
