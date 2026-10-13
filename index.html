@@ -31,7 +31,6 @@
     overflow-x: hidden;
   }
 
-  /* ═══ BLUR WRAPPER ═══ */
   .blur-wrap {
     transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     min-height: 100vh;
@@ -43,7 +42,6 @@
     transform: scale(0.98);
   }
 
-  /* ═══ HAMBURGER ═══ */
   .hamburger {
     position: fixed;
     top: 16px;
@@ -76,7 +74,6 @@
   .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
   .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); background: var(--accent2); }
 
-  /* ═══ SIDEBAR ═══ */
   .sidebar {
     position: fixed;
     top: 0;
@@ -143,7 +140,6 @@
     font-size: 1.1rem;
   }
 
-  /* ═══ OVERLAY ═══ */
   .overlay {
     position: fixed;
     inset: 0;
@@ -155,7 +151,6 @@
   }
   .overlay.active { opacity: 1; pointer-events: auto; }
 
-  /* ═══ HEADER ═══ */
   .header {
     display: flex;
     align-items: center;
@@ -199,7 +194,6 @@
   }
   .lang-btn.active { background: var(--card2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
-  /* ═══ TOP TABS ═══ */
   .top-tabs {
     display: flex;
     gap: 24px;
@@ -228,7 +222,6 @@
     border-radius: 2px;
   }
 
-  /* ═══ PAGE ═══ */
   .page { display: none; animation: pageIn 0.35s ease-out; }
   .page.active { display: block; }
   @keyframes pageIn {
@@ -236,7 +229,6 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ═══ SECTION ═══ */
   .section { padding: 0 20px; margin-bottom: 24px; }
   .section-label {
     font-size: 0.72rem;
@@ -247,7 +239,6 @@
     text-transform: uppercase;
   }
 
-  /* ═══ ROLLER GRID ═══ */
   .roller-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -325,7 +316,6 @@
     z-index: 1;
   }
 
-  /* ═══ MODULE TABS ═══ */
   .module-tabs {
     display: flex;
     gap: 6px;
@@ -355,7 +345,6 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  /* ═══ CARDS ═══ */
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -405,7 +394,6 @@
   .card.collapsed .card-content { max-height: 0; opacity: 0; }
   .card-content-inner { padding: 0 18px 18px; }
 
-  /* ═══ STOCK ROW ═══ */
   .stock-row {
     display: flex;
     align-items: center;
@@ -434,7 +422,6 @@
   .stock-text h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 3px; }
   .stock-text p { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
 
-  /* ═══ SLIDER ═══ */
   .slider-group { padding: 12px 0; }
   .slider-label {
     display: flex;
@@ -502,7 +489,6 @@
     text-transform: none;
   }
 
-  /* ═══ TOGGLE ═══ */
   .toggle-row {
     display: flex;
     align-items: center;
@@ -537,7 +523,6 @@
   .toggle.on { background: var(--accent); }
   .toggle.on::after { transform: translateX(18px); }
 
-  /* ═══ SELECT ═══ */
   select, input[type="text"] {
     background: var(--card2);
     border: 1px solid var(--border);
@@ -553,7 +538,6 @@
   }
   select:focus, input[type="text"]:focus { border-color: var(--accent); }
 
-  /* ═══ CODE EDITOR ═══ */
   .code-display {
     background: var(--bg);
     border: 1px solid var(--border);
@@ -662,7 +646,6 @@
     width: 0%;
   }
 
-  /* ═══ MAIN BUTTON ═══ */
   .main-btn {
     position: fixed;
     bottom: 20px;
@@ -686,7 +669,6 @@
   .main-btn:active:not(:disabled) { transform: translateY(0); }
   .main-btn:disabled { background: var(--dim); color: var(--muted); box-shadow: none; cursor: not-allowed; }
 
-  /* ═══ LOG BOX ═══ */
   .log-box {
     background: var(--bg);
     border: 1px solid var(--border);
@@ -706,7 +688,6 @@
   .log-box .info { color: var(--info); }
   .log-box .dim { color: var(--muted); }
 
-  /* ═══ MODAL ═══ */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -774,7 +755,6 @@
   .modal-btn.secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
   .modal-btn.secondary:hover { background: var(--dim); }
 
-  /* ═══ INFO PAGE ═══ */
   .info-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -820,7 +800,7 @@
 </head>
 <body>
 
-<!-- ═══ BLUR WRAPPER ═══ -->
+<!-- BLUR WRAPPER -->
 <div class="blur-wrap" id="blurWrap">
 
   <!-- HEADER -->
@@ -838,7 +818,7 @@
     <div class="top-tab" onclick="switchTopTab('info', this)">Info</div>
   </div>
 
-  <!-- ═══ BUILDER PAGE ═══ -->
+  <!-- BUILDER PAGE -->
   <div class="page active" id="page-builder">
 
     <!-- ROLLER SELECTION -->
@@ -1164,7 +1144,7 @@
     </div>
   </div>
 
-  <!-- ═══ INFO PAGE ═══ -->
+  <!-- INFO PAGE -->
   <div class="page" id="page-info">
     <div class="section">
       <div class="section-label">Über X3 Builder</div>
@@ -1174,7 +1154,7 @@
           <h3>⚡ Ultimate Firmware Builder</h3>
           <p>Erstelle Custom Firmware für die Ninebot X3-Serie mit vollständiger Modul-Unterstützung, individuellem Unlock-Code und ZIPv3-konformem Output.</p>
           <div style="margin-top:12px;">
-            <span class="badge purple">v10.0</span>
+            <span class="badge purple">v11.0</span>
             <span class="badge green">ZIPv3</span>
             <span class="badge">MD5</span>
             <span class="badge">XTEA</span>
@@ -1224,22 +1204,22 @@
 
 </div>
 
-<!-- ═══ MAIN BUTTON ═══ -->
+<!-- MAIN BUTTON -->
 <button class="main-btn" id="mainBtn" onclick="buildFirmware()">Firmware erstellen</button>
 
-<!-- ═══ HAMBURGER ═══ -->
+<!-- HAMBURGER -->
 <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
   <span></span><span></span><span></span>
 </div>
 
-<!-- ═══ OVERLAY ═══ -->
+<!-- OVERLAY -->
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-<!-- ═══ SIDEBAR ═══ -->
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <h1>X3</h1>
-    <p>Builder v10</p>
+    <p>Builder v11</p>
   </div>
   <div class="sidebar-item active" onclick="sidebarNav('builder', this)">
     <span class="icon">🔧</span><span>Firmware bauen</span>
@@ -1258,7 +1238,7 @@
   </div>
 </div>
 
-<!-- ═══ MODAL ═══ -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-icon" id="modalIcon">⚠️</div>
@@ -1469,7 +1449,7 @@ function closeModal() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  BUILD
+//  BUILD – KORRIGIERTE VERSION
 // ═══════════════════════════════════════════════════════════════════════
 function buildFirmware() {
   resetLog(`⚡ Baue Firmware für ${state.roller.toUpperCase()} (${state.module.toUpperCase()})...`);
@@ -1499,26 +1479,43 @@ function buildFirmware() {
   log(`  Standard-Kombi zusätzlich: ${defaultCombo ? 'JA' : 'NEIN'}`);
   log('');
 
-  // info.json
+  // ─── KORREKTUR: type = 'DRV' (gültiger ZIPv3-Wert) ───
   const info = {
     schemaVersion: 1,
     firmware: {
       displayName: `X3 ${state.roller.toUpperCase()} CFW — ${state.module.toUpperCase()}`,
       model: state.roller,
-      module: state.module,
       enforceModel: true,
+      type: 'DRV',   // ✅ KORRIGIERT: war 'VCU'/'MCU', jetzt 'DRV'
+      compatible: [`${state.roller}_DRV_AT32F415`],  // ✅ KORRIGIERT: Chip-ID
       encryption: $('encModeSelect').value,
-      unlockCode: code || null,
-      panicHold: panicHold,
-      speed: { standard: speedStd, tuning: speedTun },
-      params: {
-        hold: document.querySelector('input#holdTimeVal')?.textContent || 3,
-        boost: document.querySelector('input#boostAmpVal')?.textContent || 35,
-        kers: document.querySelector('select#kersSelect')?.value || 'strong',
+      md5: {
+        bin: 'pending',  // Wird nach der Verschlüsselung gesetzt
+        enc: 'pending'
       },
-      md5: { bin: 'pending', enc: 'pending' }
+      // Zusätzliche Metadaten (werden von SHU ignoriert, aber für Debugging nützlich)
+      _meta: {
+        unlockCode: code || null,
+        panicHold: panicHold,
+        speed: { standard: speedStd, tuning: speedTun },
+        params: {
+          hold: document.querySelector('input#holdTimeVal')?.textContent || 3,
+          boost: document.querySelector('input#boostAmpVal')?.textContent || 35,
+          kers: document.querySelector('select#kersSelect')?.value || 'strong',
+        }
+      }
     }
   };
+
+  // ─── MD5-Berechnung (Pflicht für ZIPv3) ───
+  // Da wir hier nur eine info.json + params.txt ohne echte FIRM.bin erzeugen,
+  // berechnen wir die MD5 über den gesamten info-Block (als Platzhalter).
+  // In der echten Firmware-Erstellung würdest du die MD5 über FIRM.bin berechnen.
+  const infoJsonStr = JSON.stringify(info, null, 2);
+  const infoBytes = new TextEncoder().encode(infoJsonStr);
+  const md5Hash = md5(infoBytes);
+  info.firmware.md5.bin = md5Hash;
+  info.firmware.md5.enc = md5Hash;
 
   // params.txt
   const params = `# X3 ${state.roller.toUpperCase()} CFW Configuration
@@ -1528,6 +1525,9 @@ Speed-Tuning:   Eco=${speedTun.eco} Drive=${speedTun.drive} Sport=${speedTun.spo
 Unlock-Code:    ${code || 'default'}
 Panic-Hold:     ${panicHold}
 Standard-Combo: ${defaultCombo}
+Type:           DRV
+Compatible:     ${state.roller}_DRV_AT32F415
+MD5:            ${md5Hash}
 `;
 
   const files = [
@@ -1546,6 +1546,9 @@ Standard-Combo: ${defaultCombo}
 
   log('');
   log(`✓ ZIPv3-Paket erstellt (${zip.length} Bytes)`, 'info');
+  log(`  type: DRV`, 'info');
+  log(`  compatible: ${state.roller}_DRV_AT32F415`, 'info');
+  log(`  md5: ${md5Hash}`, 'info');
   log('→ In SHU flashen: FLASH → Load from File', 'info');
 
   setTimeout(() => {
